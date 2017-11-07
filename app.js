@@ -13,8 +13,7 @@ const client = new elasticsearch.Client({
 });
 
 client.ping({
-    // ping usually has a 3000ms timeout
-    requestTimeout: 1000
+    requestTimeout: 3000
   }, function (error) {
     if (error) {
       console.trace('elasticsearch cluster is down!');
@@ -32,6 +31,10 @@ const BandSchema = new Schema({
     band_name: {
         type: String,
         required: true,
+        es_type: "text",
+        es_fields: {
+          raw: { type: "keyword" }
+        }
     },
     _id: { 
         type: String,
@@ -58,19 +61,24 @@ Band.createMapping({}, function(err, mapping){
     }
 });
 
-var stream = Band.synchronize()
-var count = 0;
+//indexDatabase();
 
-stream.on('data', function(err, doc){
-  count++;
-});
-stream.on('close', function(){
-  console.log('indexed ' + count + ' documents!');
-});
-stream.on('error', function(err){
-  console.log(err);
-});
+function indexDatabase() {
+    var stream = Band.synchronize()
+    var count = 0;
 
+    console.log('indexing database...');
+    
+    stream.on('data', function(err, doc){
+      count++;
+    });
+    stream.on('close', function(){
+      console.log('indexed ' + count + ' documents!');
+    });
+    stream.on('error', function(err){
+      console.log(err);
+    });
+}
 
 /* ENDPOINTS */
 
@@ -91,9 +99,13 @@ app.get('/band/:id', (req, res) => {
 
 app.get('/search/band_name/:query', (req, res) => {
     const query = req.params.query;
+    console.log('search band name', query);
     Band.search({
-        fuzzy: {
-            band_name: query
+        match: {
+            band_name: {
+                query: query,
+                fuzziness: auto
+            }
         }
     }, function(error,results) {
         if (error) {
