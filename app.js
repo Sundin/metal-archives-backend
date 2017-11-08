@@ -1,3 +1,5 @@
+'use strict';
+
 const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
@@ -10,21 +12,21 @@ const Band = require('./models/band');
 const Album = require('./models/album');
 
 const elasticsearch = require('elasticsearch');
-const client = new elasticsearch.Client({
+const elasticsearchClient = new elasticsearch.Client({
   host: 'localhost:9200',
   log: 'trace'
 });
 
-client.ping({
+elasticsearchClient.ping({
     requestTimeout: 3000
-  }, function (error) {
+}, function (error) {
     if (error) {
-      console.trace('elasticsearch cluster is down!');
+      console.trace('ElasticSearch cluster is down!');
       console.log(error);
     } else {
-      console.log('All is well');
+      console.log('ElasticSearch working properly');
     }
-  });
+});
 
 app.listen(3001, () => {
     console.log('Example app listening on port 3001!');
@@ -33,18 +35,23 @@ app.listen(3001, () => {
 //indexDatabase();
 
 function indexDatabase() {
-    var stream = Band.synchronize()
+    indexModel(Band);
+    indexModel(Album);
+}
+
+function indexModel(model) {
+    var stream = model.synchronize();
     var count = 0;
 
     console.log('indexing database...');
     
-    stream.on('data', function(err, doc){
+    stream.on('data', function(err, doc) {
       count++;
     });
-    stream.on('close', function(){
+    stream.on('close', function() {
       console.log('indexed ' + count + ' documents!');
     });
-    stream.on('error', function(err){
+    stream.on('error', function(err) {
       console.log(err);
     });
 }
@@ -52,7 +59,7 @@ function indexDatabase() {
 /* ENDPOINTS */
 
 app.get('/', (req, res) => {
-  res.send('Hello World!');
+  res.send();
 });
 
 app.get('/band/:band_name/:id', (req, res) => {
@@ -77,7 +84,7 @@ app.get('/band/:band_name/:id', (req, res) => {
     });
 });
 
-//Note: maybe /album/:band/:title/:id
+//Note: maybe /album/:band/:title/:id, in case we need to crawl Metal Archives
 app.get('/album/:album_id', (req, res) => {
     const album_id = req.params.album_id;
     
@@ -103,18 +110,48 @@ app.get('/search/:query', (req, res) => {
     }
 
     console.log('searching for:', query);
-    Band.search({
-        match: {
-            band_name: {
-                query: query,
-                fuzziness: auto
-            }
-        }
-    }, function(error,results) {
-        if (error) {
-            console.log(error);
-        }
-        console.log(results);
+    Promise.all([
+        searchBand(query),
+        searchAlbum(query)
+    ]).then(results => {
         res.send(results);
+    }).catch(error => {
+        console.log(error);
     });
 });
+
+function searchBand(query) {
+    return new Promise(function(resolve, reject) {
+        Band.search({
+            match: {
+                band_name: {
+                    query: query,
+                    fuzziness: 'auto'
+                }
+            }
+        }, function(error, results) {
+            if (error) {
+                reject(error)
+            }
+            resolve(results);
+        });
+    });
+}
+
+function searchAlbum(query) {
+    return new Promise(function(resolve, reject) {
+        Album.search({
+            match: {
+                title: {
+                    query: query,
+                    fuzziness: 'auto'
+                }
+            }
+        }, function(error, results) {
+            if (error) {
+                reject(error)
+            }
+            resolve(results);
+        });
+    });
+}

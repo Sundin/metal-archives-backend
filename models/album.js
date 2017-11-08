@@ -7,7 +7,7 @@ var Schema = mongoose.Schema;
 const AlbumSchema = new Schema({ 
     title: {
         type: String,
-        required: true,
+        required: false, //TODO: should be true
         es_type: "text",
         es_fields: {
           raw: { type: "keyword" }
