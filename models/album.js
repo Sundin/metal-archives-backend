@@ -4,8 +4,8 @@ const mongoosastic = require('mongoosastic');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-const BandSchema = new Schema({ 
-    band_name: {
+const AlbumSchema = new Schema({ 
+    title: {
         type: String,
         required: true,
         es_type: "text",
@@ -18,19 +18,19 @@ const BandSchema = new Schema({
         unique: true,
         required: true
     },
-    country: { 
+    year: { 
         type: String
     },
-    genre: { 
+    type: { 
         type: String
     }
 });
 
-BandSchema.plugin(mongoosastic);
+AlbumSchema.plugin(mongoosastic);
 
-const Band = mongoose.model('Band', BandSchema);
+const Album = mongoose.model('Album', AlbumSchema);
 
-Band.createMapping({}, function(err, mapping){  
+Album.createMapping({}, function(err, mapping){  
     if (err) {
       console.log('error creating mapping (you can safely ignore this)');
       console.log(err);
@@ -40,4 +40,4 @@ Band.createMapping({}, function(err, mapping){
     }
 });
 
-module.exports = Band;
+module.exports = Album;

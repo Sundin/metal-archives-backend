@@ -6,7 +6,8 @@ mongoose.connect('mongodb://localhost/test', { useMongoClient: true });
 mongoose.Promise = global.Promise;
 const Schema = mongoose.Schema;
 
-const Band = require('./models/band').band;
+const Band = require('./models/band');
+const Album = require('./models/album');
 
 const elasticsearch = require('elasticsearch');
 const client = new elasticsearch.Client({
@@ -76,16 +77,22 @@ app.get('/band/:band_name/:id', (req, res) => {
     });
 });
 
+//Note: maybe /album/:band/:title/:id
 app.get('/album/:album_id', (req, res) => {
-    const album_id = req.params.query;
+    const album_id = req.params.album_id;
     
     if (!album_id) {
         return res.status(400).send('Incomplete query');
     }
 
-    //TODO: return album
-
-    //Note: maybe /album/:band/:title/:id
+    Album.find({_id: album_id}, (error, result) => {
+        if (error) {
+            console.log(error);
+            res.status(500).send(error);
+        }
+        const album = result[0];
+        res.send(album);
+    });
 });
 
 app.get('/search/:query', (req, res) => {
