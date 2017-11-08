@@ -6,6 +6,8 @@ mongoose.connect('mongodb://localhost/test', { useMongoClient: true });
 mongoose.Promise = global.Promise;
 const Schema = mongoose.Schema;
 
+const Band = require('./models/band').band;
+
 const elasticsearch = require('elasticsearch');
 const client = new elasticsearch.Client({
   host: 'localhost:9200',
@@ -25,40 +27,6 @@ client.ping({
 
 app.listen(3001, () => {
     console.log('Example app listening on port 3001!');
-});
-
-const BandSchema = new Schema({ 
-    band_name: {
-        type: String,
-        required: true,
-        es_type: "text",
-        es_fields: {
-          raw: { type: "keyword" }
-        }
-    },
-    _id: { 
-        type: String,
-        unique: true,
-        required: true
-    },
-    country: { 
-        type: String
-    },
-    genre: { 
-        type: String
-    }
-});
-BandSchema.plugin(mongoosastic);
-const Band = mongoose.model('Band', BandSchema);
-
-Band.createMapping({}, function(err, mapping){  
-    if(err){
-      console.log('error creating mapping (you can safely ignore this)');
-      console.log(err);
-    }else{
-      console.log('mapping created!');
-      console.log(mapping);
-    }
 });
 
 //indexDatabase();
@@ -111,9 +79,9 @@ app.get('/band/:band_name/:id', (req, res) => {
 app.get('/album/:album_id', (req, res) => {
     const album_id = req.params.query;
     
-        if (!album_id) {
-            return res.status(400).send('Incomplete query');
-        }
+    if (!album_id) {
+        return res.status(400).send('Incomplete query');
+    }
 
     //TODO: return album
 
