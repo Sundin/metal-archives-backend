@@ -86,20 +86,48 @@ app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-app.get('/band/:id', (req, res) => {
+app.get('/band/:band_name/:id', (req, res) => {
+    const band_name = req.params.band_name;
     const id = req.params.id;
+
+    if (!id || !band_name) {
+        return res.status(400).send('Incomplete query');
+    }
+
     Band.find({_id: id}, (error, result) => {
         if (error) {
             console.log(error);
             res.status(500).send(error);
-        } 
-        res.send(result);
+        }
+        const band = result[0];
+        if (!band || !band.lastCrawlTimestamp) {
+            // TODO: set timestamp when fetching from M.A. Also make a new fetch if timestamp is too old (>1 month?)
+            console.log('Need the fetch band data from Metal Archives')
+        }
+        res.send(band);
     });
 });
 
-app.get('/search/band_name/:query', (req, res) => {
+app.get('/album/:album_id', (req, res) => {
+    const album_id = req.params.query;
+    
+        if (!album_id) {
+            return res.status(400).send('Incomplete query');
+        }
+
+    //TODO: return album
+
+    //Note: maybe /album/:band/:title/:id
+});
+
+app.get('/search/:query', (req, res) => {
     const query = req.params.query;
-    console.log('search band name', query);
+
+    if (!query) {
+        return res.status(400).send('Incomplete query');
+    }
+
+    console.log('searching for:', query);
     Band.search({
         match: {
             band_name: {
