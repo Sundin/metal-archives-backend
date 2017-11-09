@@ -6,7 +6,8 @@ const mongoose = require('mongoose');
 const mongoosastic = require('mongoosastic');
 mongoose.connect('mongodb://localhost/test', { useMongoClient: true });
 mongoose.Promise = global.Promise;
-const Schema = mongoose.Schema;
+
+const request = require('request-promise-native');
 
 const Band = require('./models/band');
 const Album = require('./models/album');
@@ -78,11 +79,31 @@ app.get('/band/:band_name/:id', (req, res) => {
         const band = result[0];
         if (!band || !band.lastCrawlTimestamp) {
             // TODO: set timestamp when fetching from M.A. Also make a new fetch if timestamp is too old (>1 month?)
-            console.log('Need the fetch band data from Metal Archives')
-        }
-        res.send(band);
+            console.log('Need to fetch band data from Metal Archives');
+            request.get('http://localhost:4567/band/' + band_name + '/' + id).then(bandData => {
+                res.send(bandData);
+                addToDatabase(JSON.parse(bandData));
+            }).catch(error => {
+                console.log(error);
+            });
+        } else {
+            res.send(band);
+        }        
     });
 });
+
+function addToDatabase(bandData) {
+    bandData.lastCrawlTimestamp = Date.now();
+    delete bandData.members;
+    delete bandData.links;
+    
+    Band.findOneAndUpdate({_id: bandData._id}, bandData, {upsert: true}, function (error, data) {
+        if (error) {
+            return console.error(error);
+        }
+        console.log('ok');
+    })
+}
 
 //Note: maybe /album/:band/:title/:id, in case we need to crawl Metal Archives
 app.get('/album/:album_id', (req, res) => {

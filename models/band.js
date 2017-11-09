@@ -4,6 +4,8 @@ const mongoosastic = require('mongoosastic');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
+const AlbumSchema= require('./album').schema;
+
 const BandSchema = new Schema({ 
     band_name: {
         type: String,
@@ -23,7 +25,43 @@ const BandSchema = new Schema({
     },
     genre: { 
         type: String
-    }
+    },
+    location: { 
+        type: String
+    },
+    status: { 
+        type: String
+    },
+    formed_in: { 
+        type: String
+    },
+    themes: { 
+        type: String
+    },
+    label: { 
+        _id: String,
+        name: String
+    },
+    years_active: { 
+        type: String
+    },
+    url: { 
+        type: String
+    },
+    photo_url: { 
+        type: String
+    },
+    logo_url: { 
+        type: String
+    },
+    biography: { 
+        type: String
+    },
+    members: [Object],
+    discography: [ AlbumSchema ],
+    links: [String],
+    similar: [String],
+    lastCrawlTimestamp: { type: Date },
 });
 
 BandSchema.plugin(mongoosastic);

@@ -23,7 +23,11 @@ const AlbumSchema = new Schema({
     },
     type: { 
         type: String
-    }
+    },
+    url: {
+        type: String
+    },
+    reviews: String
 });
 
 AlbumSchema.plugin(mongoosastic);
@@ -41,3 +45,4 @@ Album.createMapping({}, function(err, mapping){
 });
 
 module.exports = Album;
+module.exports.schema = AlbumSchema;
