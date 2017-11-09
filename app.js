@@ -94,9 +94,7 @@ app.get('/band/:band_name/:id', (req, res) => {
 
 function addToDatabase(bandData) {
     bandData.lastCrawlTimestamp = Date.now();
-    delete bandData.members;
-    delete bandData.links;
-    
+
     Band.findOneAndUpdate({_id: bandData._id}, bandData, {upsert: true}, function (error, data) {
         if (error) {
             return console.error(error);

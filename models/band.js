@@ -4,7 +4,8 @@ const mongoosastic = require('mongoosastic');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-const AlbumSchema= require('./album').schema;
+const AlbumSchema = require('./album').schema;
+const MemberSchema = require('./member').schema;
 
 const BandSchema = new Schema({ 
     band_name: {
@@ -57,10 +58,23 @@ const BandSchema = new Schema({
     biography: { 
         type: String
     },
-    members: [Object],
+    members: {
+        current: [ MemberSchema],
+        past: [ MemberSchema ],
+        live: [ MemberSchema ]
+    },
     discography: [ AlbumSchema ],
-    links: [String],
-    similar: [String],
+    links: [{
+        title: String,
+        url: String
+    }],
+    similar: [ {
+        name: String,
+        _id: String,
+        country: String,
+        genre: String,
+        score: String
+    } ],
     lastCrawlTimestamp: { type: Date },
 });
 
