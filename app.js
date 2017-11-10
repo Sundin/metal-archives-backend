@@ -26,14 +26,14 @@ elasticsearchClient.ping({
 }, function (error) {
     if (error) {
       console.trace('ElasticSearch cluster is down!');
-      console.log(error);
+      log(error);
     } else {
-      console.log('ElasticSearch working properly');
+      log('ElasticSearch working properly');
     }
 });
 
 app.listen(3001, () => {
-    console.log('Example app listening on port 3001!');
+    log('Example app listening on port 3001!');
 });
 
 //indexDatabase();
@@ -48,16 +48,16 @@ function indexModel(model) {
     var stream = model.synchronize();
     var count = 0;
 
-    console.log('indexing database...');
+    log('indexing database...');
     
     stream.on('data', function(err, doc) {
       count++;
     });
     stream.on('close', function() {
-      console.log('indexed ' + count + ' documents!');
+      log('indexed ' + count + ' documents!');
     });
     stream.on('error', function(err) {
-      console.log(err);
+      log(err);
     });
 }
 
@@ -71,24 +71,27 @@ app.get('/bands/:band_name/:id', (req, res) => {
     const band_name = req.params.band_name;
     const id = req.params.id;
 
+    log('GET /bands/' + band_name + '/' + id);
+
     if (!id || !band_name) {
         return res.status(400).send('Incomplete query');
     }
 
     Band.find({_id: id}, (error, result) => {
         if (error) {
-            console.log(error);
+            log(error);
             res.status(500).send(error);
         }
         const band = result[0];
         if (!band || !band.lastCrawlTimestamp) {
             // TODO: Also make a new fetch if timestamp is too old (>1 month?)
-            console.log('Need to fetch band data from Metal Archives');
-            request.get(process.env.SCRAPER_URL + '/bands/' + band_name + '/' + id).then(bandData => {
+            log('Need to fetch band data from Metal Archives');
+            const url = process.env.SCRAPER_URL + '/bands/' + band_name + '/' + id;
+            request.get(url).then(bandData => {
                 res.send(bandData);
                 addBandToDatabase(JSON.parse(bandData), true);
             }).catch(error => {
-                console.log(error);
+                log(url + ' failed with status code: ' + error.statusCode);
             });
         } else {
             res.send(band);
@@ -99,6 +102,8 @@ app.get('/bands/:band_name/:id', (req, res) => {
 //Note: maybe /album/:band/:title/:id, in case we need to crawl Metal Archives
 app.get('/albums/:album_id', (req, res) => {
     const album_id = req.params.album_id;
+
+    log('GET /albums/' + album_id);
     
     if (!album_id) {
         return res.status(400).send('Incomplete query');
@@ -106,7 +111,7 @@ app.get('/albums/:album_id', (req, res) => {
 
     Album.find({_id: album_id}, (error, result) => {
         if (error) {
-            console.log(error);
+            log(error);
             res.status(500).send(error);
         }
         const album = result[0];
@@ -117,18 +122,20 @@ app.get('/albums/:album_id', (req, res) => {
 app.get('/search/:query', (req, res) => {
     const query = req.params.query;
 
+    log('GET /search/' + query);
+
     if (!query) {
         return res.status(400).send('Incomplete query');
     }
 
-    console.log('searching for:', query);
+    log('searching for: ' + query);
     Promise.all([
         searchBand(query),
         searchAlbum(query)
     ]).then(results => {
         res.send(results);
     }).catch(error => {
-        console.log(error);
+        log(error);
     });
 });
 
@@ -137,19 +144,21 @@ app.get('/search/:query', (req, res) => {
 app.get('/browse_bands/:letter', (req, res) => {
     const letter = req.params.letter;
 
+    log('GET /browse_bands/' + letter);
+
     if (!letter) {
         return res.status(400).send('Incomplete query');
     }
 
     request.get(process.env.SCRAPER_URL + '/browse_bands/' + letter).then(bands => {
-        console.log(JSON.parse(bands).length + ' bands found for letter ' + letter);
+        log(JSON.parse(bands).length + ' bands found for letter ' + letter);
         res.send(bands);
 
         JSON.parse(bands).forEach(band => {
             addBandToDatabase(band, false);
         });
     }).catch(error => {
-        console.log(error);
+        log('Failed browsing letter ' + letter + ' with status code: ' + error.statusCode);
     });
 });
 
@@ -202,7 +211,7 @@ function addBandToDatabase(bandData, updateTimestamp) {
         if (error) {
             return console.error(error);
         }
-        console.log(bandData.band_name + ': ok');
+        log(bandData.band_name + ': band added to database');
     });
 
     if (bandData.discography) {
@@ -217,7 +226,7 @@ function addAlbumToDatabase(albumData) {
         if (error) {
             return console.error(error);
         }
-        console.log(albumData.title + ': ok');
+        log(albumData.title + ': album added to database');
     });
 }
 
@@ -228,6 +237,10 @@ function fetchAlbumFromMetalArchives(albumData) {
     request.get(url).then(albumData => {
         addAlbumToDatabase(JSON.parse(albumData));
     }).catch(error => {
-        console.log(error);
+        log('Failed fetching ' + albumData.url + ' with status code: ' + error.statusCode);
     });
+}
+
+function log(message) {
+    console.log(message);
 }
