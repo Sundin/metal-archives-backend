@@ -134,14 +134,14 @@ app.get('/search/:query', (req, res) => {
 
 /* CRAWLER */
 
-app.get('/quick_crawl/:letter', (req, res) => {
+app.get('/browse_bands/:letter', (req, res) => {
     const letter = req.params.letter;
 
     if (!letter) {
         return res.status(400).send('Incomplete query');
     }
 
-    request.get(process.env.SCRAPER_URL + '/quick_crawl/' + letter).then(bands => {
+    request.get(process.env.SCRAPER_URL + '/browse_bands/' + letter).then(bands => {
         console.log(JSON.parse(bands).length + ' bands found for letter ' + letter);
         res.send(bands);
 
