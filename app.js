@@ -83,8 +83,9 @@ app.get('/bands/:band_name/:id', (req, res) => {
             res.status(500).send(error);
         }
         const band = result[0];
-        if (!band || !band.lastCrawlTimestamp) {
-            // TODO: Also make a new fetch if timestamp is too old (>1 month?)
+        const ONE_DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
+        const ONE_MONTH_AGO = Date.now() - 30 * ONE_DAY_IN_MILLISECONDS;
+        if (!band || !band.lastCrawlTimestamp || band.lastCrawlTimestamp < ONE_MONTH_AGO) {
             log('Need to fetch band data from Metal Archives');
             const url = process.env.SCRAPER_URL + '/bands/' + band_name + '/' + id;
             request.get(url).then(bandData => {
@@ -114,6 +115,11 @@ app.get('/albums/:album_id', (req, res) => {
             log(error);
             res.status(500).send(error);
         }
+
+        if (result.length > 1) {
+            log('MULTIPLE ALBUMS WITH SAME ID: ' + album_id + ' !!!!!!!!!!!!!!!!');
+        }
+
         const album = result[0];
         res.send(album);
     });
