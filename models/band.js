@@ -41,11 +41,13 @@ const BandSchema = new Schema({
         past: [ MemberSchema ],
         live: [ MemberSchema ]
     },
-    discography: [ AlbumSchema ],
-    links: [{
+    discography: [ {
+        type: AlbumSchema,
+        default: []
+    } ], links: [ {
         title: String,
         url: String
-    }],
+    } ],
     similar: [ {
         name: String,
         _id: String,

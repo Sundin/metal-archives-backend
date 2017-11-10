@@ -17,17 +17,16 @@ const AlbumSchema = new Schema({
     },
     _id: { 
         type: String,
-        unique: true,
-        sparse: true
+        unique: true
     },
     year: String,
     type: String,
     url: String,
     reviews: String,
-    bands: [{
+    bands: [ {
         _id: String,
         name: String
-    }],
+    } ],
     release_date: String,
     catalog_id: String,
     label: {
@@ -36,10 +35,10 @@ const AlbumSchema = new Schema({
     },
     format: String,
     limitation: String,
-    songs: [{
+    songs: [ {
         title: String,
         length: String
-    }],
+    } ],
     cover_url: String,
     lineup: [ MemberSchema ]
 });

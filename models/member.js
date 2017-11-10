@@ -10,21 +10,15 @@ const MemberSchema = new Schema({
         required: true
     },
     _id: { 
-        type: String,
-        unique: true,
-        sparse: true
-    },
-    url: { 
         type: String
     },
-    instrument: { 
-        type: String
-    },
-    see_also: [{
+    url: String,
+    instrument: String,
+    see_also: [ {
         band_name: String,
         _id: String,
         still_member: Boolean
-    }]
+    } ]
 });
 
 MemberSchema.plugin(mongoosastic);
