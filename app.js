@@ -147,6 +147,37 @@ app.get('/search/:query', (req, res) => {
 
 /* CRAWLER */
 
+const ALL_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'NBR', '~'];
+
+app.get('/browse_all_bands', (req, res) => {
+    log('GET /browse_all_bands/');
+
+    let count = 0;
+    ALL_LETTERS.forEach(letter => {
+        browseLetter(letter).then(result => {
+            count++;
+
+            if (count >= ALL_LETTERS.length) {
+                log('DONE!!!!!!!!!!!!!!!!!!');
+            }
+        });
+    });
+});
+
+function browseLetter(letter) {
+    return request.get(process.env.SCRAPER_URL + '/browse_bands/' + letter).then(bands => {
+        log(JSON.parse(bands).length + ' bands found for letter ' + letter);
+
+        JSON.parse(bands).forEach(band => {
+            addBandToDatabase(band, false);
+        });
+        return Promise.resolve(true);
+    }).catch(error => {
+        log('Failed browsing letter ' + letter + ' with status code: ' + error.statusCode);
+        return Promise.resolve(false);
+    });
+}
+
 app.get('/browse_bands/:letter', (req, res) => {
     const letter = req.params.letter;
 
@@ -213,7 +244,7 @@ function addBandToDatabase(bandData, updateTimestamp) {
         bandData.lastCrawlTimestamp = Date.now();
     }
 
-    Band.findOneAndUpdate({_id: bandData._id}, bandData, {upsert: true}, function (error, data) {
+    Band.findOneAndUpdate({_id: bandData._id}, bandData, {upsert: true, returnNewDocument: true}, function (error, data) {
         if (error) {
             return console.error(error);
         }
@@ -228,7 +259,7 @@ function addBandToDatabase(bandData, updateTimestamp) {
 }
 
 function addAlbumToDatabase(albumData) {
-    Album.findOneAndUpdate({_id: albumData._id}, albumData, {upsert: true}, function (error, data) {
+    Album.findOneAndUpdate({_id: albumData._id}, albumData, {upsert: true, returnNewDocument: true}, function (error, data) {
         if (error) {
             return console.error(error);
         }

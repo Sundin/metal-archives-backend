@@ -22,10 +22,19 @@ const BandSchema = new Schema({
         unique: true,
         required: true
     },
-    country: String,
-    genre: String,
+    country: {
+        type: String,
+        es_indexed: true
+    },
+    genre: {
+        type: String,
+        es_indexed: true
+    },
     location: String,
-    status: String,
+    status: {
+        type: String,
+        es_indexed: true
+    },
     formed_in: String,
     themes: String,
     label: { 
