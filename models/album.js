@@ -4,10 +4,12 @@ const mongoosastic = require('mongoosastic');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
+const MemberSchema = require('./member').schema;
+
 const AlbumSchema = new Schema({ 
     title: {
         type: String,
-        required: false, //TODO: should be true
+        required: true,
         es_type: "text",
         es_fields: {
           raw: { type: "keyword" }
@@ -18,16 +20,28 @@ const AlbumSchema = new Schema({
         unique: true,
         required: true
     },
-    year: { 
-        type: String
+    year: String,
+    type: String,
+    url: String,
+    reviews: String,
+    bands: [{
+        _id: String,
+        name: String
+    }],
+    release_date: String,
+    catalog_id: String,
+    label: {
+        _id: String,
+        name: String
     },
-    type: { 
-        type: String
-    },
-    url: {
-        type: String
-    },
-    reviews: String
+    format: String,
+    limitation: String,
+    songs: [{
+        title: String,
+        length: String
+    }],
+    cover_url: String,
+    lineup: [ MemberSchema ]
 });
 
 AlbumSchema.plugin(mongoosastic);

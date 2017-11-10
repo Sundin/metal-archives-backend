@@ -1,5 +1,7 @@
 'use strict';
 
+require('dotenv').config();
+
 const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
@@ -11,6 +13,7 @@ const request = require('request-promise-native');
 
 const Band = require('./models/band');
 const Album = require('./models/album');
+const Member = require('./models/member');
 
 const elasticsearch = require('elasticsearch');
 const elasticsearchClient = new elasticsearch.Client({
@@ -38,6 +41,7 @@ app.listen(3001, () => {
 function indexDatabase() {
     indexModel(Band);
     indexModel(Album);
+    indexModel(Member);
 }
 
 function indexModel(model) {
@@ -63,7 +67,7 @@ app.get('/', (req, res) => {
   res.send();
 });
 
-app.get('/band/:band_name/:id', (req, res) => {
+app.get('/bands/:band_name/:id', (req, res) => {
     const band_name = req.params.band_name;
     const id = req.params.id;
 
@@ -77,10 +81,10 @@ app.get('/band/:band_name/:id', (req, res) => {
             res.status(500).send(error);
         }
         const band = result[0];
-        if (!band || !band.lastCrawlTimestamp) {
-            // TODO: set timestamp when fetching from M.A. Also make a new fetch if timestamp is too old (>1 month?)
+        if (true) {
+            // TODO: Also make a new fetch if timestamp is too old (>1 month?)
             console.log('Need to fetch band data from Metal Archives');
-            request.get('http://localhost:4567/band/' + band_name + '/' + id).then(bandData => {
+            request.get(process.env.SCRAPER_URL + '/bands/' + band_name + '/' + id).then(bandData => {
                 res.send(bandData);
                 addToDatabase(JSON.parse(bandData));
             }).catch(error => {
@@ -92,19 +96,8 @@ app.get('/band/:band_name/:id', (req, res) => {
     });
 });
 
-function addToDatabase(bandData) {
-    bandData.lastCrawlTimestamp = Date.now();
-
-    Band.findOneAndUpdate({_id: bandData._id}, bandData, {upsert: true}, function (error, data) {
-        if (error) {
-            return console.error(error);
-        }
-        console.log('ok');
-    })
-}
-
 //Note: maybe /album/:band/:title/:id, in case we need to crawl Metal Archives
-app.get('/album/:album_id', (req, res) => {
+app.get('/albums/:album_id', (req, res) => {
     const album_id = req.params.album_id;
     
     if (!album_id) {
@@ -139,6 +132,8 @@ app.get('/search/:query', (req, res) => {
     });
 });
 
+/* SEARCH */
+
 function searchBand(query) {
     return new Promise(function(resolve, reject) {
         Band.search({
@@ -172,5 +167,42 @@ function searchAlbum(query) {
             }
             resolve(results);
         });
+    });
+}
+
+/* DATABASE */
+
+function addToDatabase(bandData) {
+    bandData.lastCrawlTimestamp = Date.now();
+
+    Band.findOneAndUpdate({_id: bandData._id}, bandData, {upsert: true}, function (error, data) {
+        if (error) {
+            return console.error(error);
+        }
+        console.log(bandData.band_name + ': ok');
+    });
+
+    bandData.discography.forEach(album => {
+        fetchAlbumFromMetalArchives(album);
+    })
+}
+
+function addAlbumToDatabase(albumData) {
+    Album.findOneAndUpdate({_id: albumData._id}, albumData, {upsert: true}, function (error, data) {
+        if (error) {
+            return console.error(error);
+        }
+        console.log(albumData.title + ': ok');
+    });
+}
+
+/* SCRAPER */
+
+function fetchAlbumFromMetalArchives(albumData) {
+    const url = albumData.url.replace('https://www.metal-archives.com', process.env.SCRAPER_URL);
+    request.get(url).then(albumData => {
+        addAlbumToDatabase(JSON.parse(albumData));
+    }).catch(error => {
+        console.log(error);
     });
 }
