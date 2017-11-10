@@ -81,12 +81,12 @@ app.get('/bands/:band_name/:id', (req, res) => {
             res.status(500).send(error);
         }
         const band = result[0];
-        if (true) {
+        if (!band || !band.lastCrawlTimestamp) {
             // TODO: Also make a new fetch if timestamp is too old (>1 month?)
             console.log('Need to fetch band data from Metal Archives');
             request.get(process.env.SCRAPER_URL + '/bands/' + band_name + '/' + id).then(bandData => {
                 res.send(bandData);
-                addToDatabase(JSON.parse(bandData));
+                addBandToDatabase(JSON.parse(bandData), true);
             }).catch(error => {
                 console.log(error);
             });
@@ -132,6 +132,27 @@ app.get('/search/:query', (req, res) => {
     });
 });
 
+/* CRAWLER */
+
+app.get('/quick_crawl/:letter', (req, res) => {
+    const letter = req.params.letter;
+
+    if (!letter) {
+        return res.status(400).send('Incomplete query');
+    }
+
+    request.get(process.env.SCRAPER_URL + '/quick_crawl/' + letter).then(bands => {
+        console.log(JSON.parse(bands).length + ' bands found for letter ' + letter);
+        res.send(bands);
+
+        JSON.parse(bands).forEach(band => {
+            addBandToDatabase(band, false);
+        });
+    }).catch(error => {
+        console.log(error);
+    });
+});
+
 /* SEARCH */
 
 function searchBand(query) {
@@ -172,8 +193,10 @@ function searchAlbum(query) {
 
 /* DATABASE */
 
-function addToDatabase(bandData) {
-    bandData.lastCrawlTimestamp = Date.now();
+function addBandToDatabase(bandData, updateTimestamp) {
+    if (updateTimestamp) {
+        bandData.lastCrawlTimestamp = Date.now();
+    }
 
     Band.findOneAndUpdate({_id: bandData._id}, bandData, {upsert: true}, function (error, data) {
         if (error) {
@@ -182,9 +205,11 @@ function addToDatabase(bandData) {
         console.log(bandData.band_name + ': ok');
     });
 
-    bandData.discography.forEach(album => {
-        fetchAlbumFromMetalArchives(album);
-    })
+    if (bandData.discography) {
+        bandData.discography.forEach(album => {
+            fetchAlbumFromMetalArchives(album);
+        });
+    }
 }
 
 function addAlbumToDatabase(albumData) {
