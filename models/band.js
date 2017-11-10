@@ -21,43 +21,21 @@ const BandSchema = new Schema({
         unique: true,
         required: true
     },
-    country: { 
-        type: String
-    },
-    genre: { 
-        type: String
-    },
-    location: { 
-        type: String
-    },
-    status: { 
-        type: String
-    },
-    formed_in: { 
-        type: String
-    },
-    themes: { 
-        type: String
-    },
+    country: String,
+    genre: String,
+    location: String,
+    status: String,
+    formed_in: String,
+    themes: String,
     label: { 
         _id: String,
         name: String
     },
-    years_active: { 
-        type: String
-    },
-    url: { 
-        type: String
-    },
-    photo_url: { 
-        type: String
-    },
-    logo_url: { 
-        type: String
-    },
-    biography: { 
-        type: String
-    },
+    years_active: String,
+    url: String,
+    photo_url: String,
+    logo_url: String,
+    biography: String,
     members: {
         current: [ MemberSchema],
         past: [ MemberSchema ],

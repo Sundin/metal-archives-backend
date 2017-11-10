@@ -6,7 +6,7 @@ const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
 const mongoosastic = require('mongoosastic');
-mongoose.connect('mongodb://localhost/test', { useMongoClient: true });
+mongoose.connect('mongodb://localhost/metallic-avenger', { useMongoClient: true });
 mongoose.Promise = global.Promise;
 
 const request = require('request-promise-native');

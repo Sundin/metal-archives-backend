@@ -12,7 +12,7 @@ const MemberSchema = new Schema({
     _id: { 
         type: String,
         unique: true,
-        required: true
+        sparse: true
     },
     url: { 
         type: String
