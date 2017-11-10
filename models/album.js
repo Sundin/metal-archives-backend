@@ -13,11 +13,11 @@ const AlbumSchema = new Schema({
         es_type: "text",
         es_fields: {
           raw: { type: "keyword" }
-        }
+        },
+        es_indexed: true
     },
     _id: { 
-        type: String,
-        unique: true
+        type: String
     },
     year: String,
     type: String,

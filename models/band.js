@@ -14,7 +14,8 @@ const BandSchema = new Schema({
         es_type: "text",
         es_fields: {
           raw: { type: "keyword" }
-        }
+        },
+        es_indexed: true
     },
     _id: { 
         type: String,
@@ -29,7 +30,8 @@ const BandSchema = new Schema({
     themes: String,
     label: { 
         _id: String,
-        name: String
+        name: String,
+        url: String
     },
     years_active: String,
     url: String,
