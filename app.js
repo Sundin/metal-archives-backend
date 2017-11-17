@@ -138,8 +138,11 @@ app.get('/search/:query', (req, res) => {
     Promise.all([
         searchBand(query),
         searchAlbum(query)
-    ]).then(results => {
-        res.send(results);
+    ]).then(([bands, albums]) => {
+        res.send(JSON.stringify({
+            query: query,
+            search_results: bands.hits.hits}
+        ));
     }).catch(error => {
         log(error);
     });
