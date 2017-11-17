@@ -32,8 +32,9 @@ elasticsearchClient.ping({
     }
 });
 
-app.listen(3001, () => {
-    log('Example app listening on port 3001!');
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+    log('App listening on port ' + port);
 });
 
 //indexDatabase();
