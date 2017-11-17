@@ -10,14 +10,12 @@
   "author": "Gustav Sundin / Kicksort",
   "license": "ISC",
   "dependencies": {
+    "dotenv": "4.0.0",
     "elasticsearch": "13.3.1",
     "express": "4.16.2",
     "mongoosastic": "4.3.0",
     "mongoose": "4.13.0",
     "request": "2.83.0",
     "request-promise-native": "1.0.5"
-  },
-  "devDependencies": {
-    "dotenv": "4.0.0"
   }
 }
