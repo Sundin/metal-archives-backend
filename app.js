@@ -6,7 +6,7 @@ const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
 const mongoosastic = require('mongoosastic');
-mongoose.connect('mongodb://localhost/metallic-avenger', { useMongoClient: true });
+mongoose.connect(process.env.MONGODB_URI, { useMongoClient: true });
 mongoose.Promise = global.Promise;
 
 const request = require('request-promise-native');
@@ -17,7 +17,7 @@ const Member = require('./models/member');
 
 const elasticsearch = require('elasticsearch');
 const elasticsearchClient = new elasticsearch.Client({
-  host: 'localhost:9200',
+  host: process.env.SEARCHBOX_URL,
   log: 'trace'
 });
 
