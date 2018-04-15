@@ -1,0 +1,50 @@
+service: metal-archives-api
+
+provider: 
+  name: aws
+  runtime: nodejs8.10
+  region: eu-west-1
+  profile: ${file(./deploy/config.js):getEnvVars.AWS_PROFILE}
+  environment:
+    SCRAPER_URL: ${file(./deploy/config.js):getEnvVars.SCRAPER_URL}
+    MONGODB_URI: ${file(./deploy/config.js):getEnvVars.MONGODB_URI}
+    ELASTICSEARCH_URL: ${file(./deploy/config.js):getEnvVars.ELASTICSEARCH_URL}
+    PORT: ${file(./deploy/config.js):getEnvVars.PORT}
+  iamRoleStatements:
+      - Effect: Allow
+        Action: "*"
+        Resource: "*"
+
+package:
+  exclude: 
+    - .git/**
+    - data/**
+
+functions:
+
+  get-band:
+    handler: handler.getBand
+    memorySize: 128
+    description: Test
+    events:
+      - http: 
+          path: bands/{band_name}/{id}
+          method: get
+          request:
+            parameters: 
+               paths: 
+                  band_name: true
+                  id: true
+
+  get-album:
+    handler: handler.getAlbum
+    memorySize: 128
+    description: Test
+    events:
+      - http: 
+          path: albums/{album_id}
+          method: get
+          request: 
+            parameters: 
+               paths: 
+                  album_id: true

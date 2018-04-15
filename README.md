@@ -24,3 +24,10 @@ Create a folder named `data`.
 `elasticsearch`
 
 `npm start`
+
+## Environment variables
+At the moment you need to modify four different files if you want to add an environment variable: `serverless.yaml`, `.env` (for running locally), `deploy/production.env` and `deploy/config.js`.
+
+## Deploying the Lambdas
+
+`npm run deploy`

@@ -5,17 +5,19 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node app.js"
+    "deploy": "./deploy/deploy.sh"
   },
   "author": "Gustav Sundin / Kicksort",
   "license": "ISC",
   "dependencies": {
     "dotenv": "4.0.0",
     "elasticsearch": "13.3.1",
-    "express": "4.16.2",
     "mongoosastic": "4.3.0",
     "mongoose": "4.13.0",
     "request": "2.83.0",
     "request-promise-native": "1.0.5"
+  },
+  "devDependencies": {
+    "serverless": "1.26.1"
   }
 }

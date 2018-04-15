@@ -1,6 +1,6 @@
 'use strict';
 
-const mongoosastic = require('mongoosastic');
+// const mongoosastic = require('mongoosastic');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
@@ -43,19 +43,19 @@ const AlbumSchema = new Schema({
     lineup: [ MemberSchema ]
 });
 
-AlbumSchema.plugin(mongoosastic);
+// AlbumSchema.plugin(mongoosastic);
 
 const Album = mongoose.model('Album', AlbumSchema);
 
-Album.createMapping({}, function(err, mapping){  
-    if (err) {
-      console.log('error creating mapping (you can safely ignore this)');
-      console.log(err);
-    } else {
-      console.log('mapping created!');
-      console.log(mapping);
-    }
-});
+// Album.createMapping({}, function(err, mapping){  
+//     if (err) {
+//       console.log('error creating mapping (you can safely ignore this)');
+//       console.log(err);
+//     } else {
+//       console.log('mapping created!');
+//       console.log(mapping);
+//     }
+// });
 
 module.exports = Album;
 module.exports.schema = AlbumSchema;
