@@ -23,7 +23,7 @@ Create a folder named `data`.
 
 `elasticsearch`
 
-`npm start`
+TODO: Add configuration for running the lambdas locally.
 
 ## Environment variables
 At the moment you need to modify four different files if you want to add an environment variable: `serverless.yaml`, `.env` (for running locally), `deploy/production.env` and `deploy/config.js`.
@@ -31,3 +31,6 @@ At the moment you need to modify four different files if you want to add an envi
 ## Deploying the Lambdas
 
 `npm run deploy`
+
+## Linting
+Use `npm run lint` to run ESLint and automatically fix lint warnings where possible.
