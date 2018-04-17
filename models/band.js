@@ -7,17 +7,17 @@ var Schema = mongoose.Schema;
 const AlbumSchema = require('./album').schema;
 const MemberSchema = require('./member').schema;
 
-const BandSchema = new Schema({ 
+const BandSchema = new Schema({
     band_name: {
         type: String,
         required: true,
-        es_type: "text",
+        es_type: 'text',
         es_fields: {
-          raw: { type: "keyword" }
+            raw: { type: 'keyword' }
         },
         es_indexed: true
     },
-    _id: { 
+    _id: {
         type: String,
         unique: true,
         required: true
@@ -37,7 +37,7 @@ const BandSchema = new Schema({
     },
     formed_in: String,
     themes: String,
-    label: { 
+    label: {
         _id: String,
         name: String,
         url: String
@@ -66,14 +66,14 @@ const BandSchema = new Schema({
         genre: String,
         score: String
     } ],
-    lastCrawlTimestamp: { type: Date },
+    lastCrawlTimestamp: { type: Date }
 });
 
 // BandSchema.plugin(mongoosastic);
 
 const Band = mongoose.model('Band', BandSchema);
 
-// Band.createMapping({}, function(err, mapping){  
+// Band.createMapping({}, function(err, mapping){
 //     if (err) {
 //       console.log('error creating mapping (you can safely ignore this)');
 //       console.log(err);

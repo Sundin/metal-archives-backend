@@ -28,7 +28,7 @@ module.exports = {
                 console.log('connected to mongo');
                 Band.find({_id: id}).then(result => {
                     console.log('got result!');
-                    
+
                     const band = result[0];
                     const ONE_DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
                     const ONE_MONTH_AGO = Date.now() - 30 * ONE_DAY_IN_MILLISECONDS;
@@ -46,7 +46,7 @@ module.exports = {
                         console.log('Band already in database');
                         resolve(band);
                         db.close();
-                    }        
+                    }
                 }).catch(error => {
                     console.log(error);
                     reject(error);
@@ -104,7 +104,7 @@ function addBandToDatabase(bandData, updateTimestamp) {
         bandData.lastCrawlTimestamp = Date.now();
     }
 
-    Band.findOneAndUpdate({_id: bandData._id}, bandData, {upsert: true, returnNewDocument: true}, function (error, data) {
+    Band.findOneAndUpdate({_id: bandData._id}, bandData, {upsert: true, returnNewDocument: true}, function(error, data) {
         if (error) {
             return console.error(error);
         }
@@ -119,7 +119,7 @@ function addBandToDatabase(bandData, updateTimestamp) {
 }
 
 function addAlbumToDatabase(albumData) {
-    Album.findOneAndUpdate({_id: albumData._id}, albumData, {upsert: true, returnNewDocument: true}, function (error, data) {
+    Album.findOneAndUpdate({_id: albumData._id}, albumData, {upsert: true, returnNewDocument: true}, function(error, data) {
         if (error) {
             return console.error(error);
         }

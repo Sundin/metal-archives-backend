@@ -8,8 +8,8 @@ const albumHandler = require('./albumHandler');
 const createErrorResponse = (statusCode, message) => ({
     statusCode: statusCode || 501,
     headers: { 'Content-Type': 'text/plain' },
-    body: message || 'Incorrect id',
-  });
+    body: message || 'Incorrect id'
+});
 
 module.exports = {
     getBand: (event, context, callback) => {
