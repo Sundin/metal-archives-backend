@@ -6,17 +6,17 @@ var Schema = mongoose.Schema;
 
 const MemberSchema = require('./member').schema;
 
-const AlbumSchema = new Schema({ 
+const AlbumSchema = new Schema({
     title: {
         type: String,
         required: true,
-        es_type: "text",
+        es_type: 'text',
         es_fields: {
-          raw: { type: "keyword" }
+            raw: { type: 'keyword' }
         },
         es_indexed: true
     },
-    _id: { 
+    _id: {
         type: String
     },
     year: String,
@@ -47,7 +47,7 @@ const AlbumSchema = new Schema({
 
 const Album = mongoose.model('Album', AlbumSchema);
 
-// Album.createMapping({}, function(err, mapping){  
+// Album.createMapping({}, function(err, mapping){
 //     if (err) {
 //       console.log('error creating mapping (you can safely ignore this)');
 //       console.log(err);

@@ -13,18 +13,18 @@ const Member = require('./models/member');
 
 const elasticsearch = require('elasticsearch');
 const elasticsearchClient = new elasticsearch.Client({
-  host: process.env.ELASTICSEARCH_URL,
-  log: 'trace'
+    host: process.env.ELASTICSEARCH_URL,
+    log: 'trace'
 });
 
 elasticsearchClient.ping({
     requestTimeout: 3000
-}, function (error) {
+}, function(error) {
     if (error) {
-      console.trace('ElasticSearch cluster is down!');
-      log(error);
+        console.trace('ElasticSearch cluster is down!');
+        log(error);
     } else {
-      log('ElasticSearch working properly');
+        log('ElasticSearch working properly');
     }
 });
 
@@ -33,11 +33,11 @@ module.exports = {
     search: (query) => {
         return new Promise((resolve, reject) => {
             log('GET /search/' + query);
-    
+
             if (!query) {
                 reject(new Error('Incomplete query'));
             }
-    
+
             log('searching for: ' + query);
             return Promise.all([
                 searchBand(query),
@@ -67,7 +67,7 @@ function searchBand(query) {
             }
         }, function(error, results) {
             if (error) {
-                reject(error)
+                reject(error);
             }
             resolve(results);
         });
@@ -85,7 +85,7 @@ function searchAlbum(query) {
             }
         }, function(error, results) {
             if (error) {
-                reject(error)
+                reject(error);
             }
             resolve(results);
         });

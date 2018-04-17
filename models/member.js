@@ -4,12 +4,12 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-const MemberSchema = new Schema({ 
+const MemberSchema = new Schema({
     name: {
         type: String,
         required: true
     },
-    _id: { 
+    _id: {
         type: String
     },
     url: String,
@@ -25,7 +25,7 @@ const MemberSchema = new Schema({
 
 const Member = mongoose.model('Member', MemberSchema);
 
-// Member.createMapping({}, function(err, mapping){  
+// Member.createMapping({}, function(err, mapping){
 //     if (err) {
 //       console.log('error creating mapping (you can safely ignore this)');
 //       console.log(err);
