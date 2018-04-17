@@ -1,8 +1,9 @@
 'use strict';
 
 const mongoose = require('mongoose');
-
 const request = require('request-promise-native');
+
+const logger = require('./logger');
 
 const Band = require('./models/band');
 const Album = require('./models/album');
@@ -10,7 +11,7 @@ const Member = require('./models/member');
 
 module.exports = {
     getBand: (band_name, id) => {
-        console.log('GET /bands/' + band_name + '/' + id);
+        logger.info('GET /bands/' + band_name + '/' + id);
 
         mongoose.connect(process.env.MONGODB_URI, { useMongoClient: true });
         mongoose.Promise = global.Promise;
@@ -18,37 +19,36 @@ module.exports = {
 
         return new Promise(function(resolve, reject) {
             if (!id || !band_name) {
-                console.error('missing params');
-                reject(new Error('Incomplete error'));
+                reject(new Error('Missing parameters'));
             }
 
-            console.log('searching...');
+            logger.info('searching...');
 
             db.once('connected', () => {
-                console.log('connected to mongo');
+                logger.info('connected to mongo');
                 Band.find({_id: id}).then(result => {
-                    console.log('got result!');
+                    logger.info('got result!');
 
                     const band = result[0];
                     const ONE_DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
                     const ONE_MONTH_AGO = Date.now() - 30 * ONE_DAY_IN_MILLISECONDS;
                     if (!band || !band.lastCrawlTimestamp || band.lastCrawlTimestamp < ONE_MONTH_AGO) {
-                        console.log('Need to fetch band data from Metal Archives');
+                        logger.info('Need to fetch band data from Metal Archives');
                         const url = process.env.SCRAPER_URL + '/bands/' + band_name + '/' + id;
                         request.get(url).then(bandData => {
                             resolve(band);
                             db.close();
                             addBandToDatabase(JSON.parse(bandData), true);
                         }).catch(error => {
-                            console.log(url + ' failed with status code: ' + error.statusCode);
+                            reject(new Error(url + ' failed with status code: ' + error.statusCode));
+                            db.close();
                         });
                     } else {
-                        console.log('Band already in database');
+                        logger.info('Band already in database');
                         resolve(band);
                         db.close();
                     }
                 }).catch(error => {
-                    console.log(error);
                     reject(error);
                     db.close();
                 });
@@ -59,7 +59,7 @@ module.exports = {
     /* CRAWLER */
 
     browseAllBands: () => {
-        log('GET /browse_all_bands/');
+        logger.info('GET /browse_all_bands/');
 
         const ALL_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'NBR', '~'];
 
@@ -69,7 +69,7 @@ module.exports = {
                 count++;
 
                 if (count >= ALL_LETTERS.length) {
-                    log('DONE!!!!!!!!!!!!!!!!!!');
+                    logger.info('DONE!!!!!!!!!!!!!!!!!!');
                 }
             });
         });
@@ -77,21 +77,22 @@ module.exports = {
 
     browseBands: (letter) => {
         return new Promise((resolve, reject) => {
-            log('GET /browse_bands/' + letter);
+            logger.info('GET /browse_bands/' + letter);
 
             if (!letter) {
                 reject(new Error('Incomplete query'));
             }
 
             request.get(process.env.SCRAPER_URL + '/browse_bands/' + letter).then(bands => {
-                log(JSON.parse(bands).length + ' bands found for letter ' + letter);
+                logger.info(JSON.parse(bands).length + ' bands found for letter ' + letter);
                 resolve(bands);
 
                 JSON.parse(bands).forEach(band => {
                     addBandToDatabase(band, false);
                 });
             }).catch(error => {
-                log('Failed browsing letter ' + letter + ' with status code: ' + error.statusCode);
+                logger.error('Failed browsing letter ' + letter + ' with status code: ' + error.statusCode);
+                reject(new Error('Failed browsing letter ' + letter + ' with status code: ' + error.statusCode));
             });
         });
     }
@@ -106,9 +107,10 @@ function addBandToDatabase(bandData, updateTimestamp) {
 
     Band.findOneAndUpdate({_id: bandData._id}, bandData, {upsert: true, returnNewDocument: true}, function(error, data) {
         if (error) {
-            return console.error(error);
+            logger.error(error);
+            return;
         }
-        log(bandData.band_name + ': band added to database');
+        logger.info(bandData.band_name + ': band added to database');
     });
 
     if (bandData.discography) {
@@ -121,9 +123,10 @@ function addBandToDatabase(bandData, updateTimestamp) {
 function addAlbumToDatabase(albumData) {
     Album.findOneAndUpdate({_id: albumData._id}, albumData, {upsert: true, returnNewDocument: true}, function(error, data) {
         if (error) {
-            return console.error(error);
+            logger.error(error);
+            return;
         }
-        log(albumData.title + ': album added to database');
+        logger.info(albumData.title + ': album added to database');
     });
 }
 
@@ -131,14 +134,14 @@ function addAlbumToDatabase(albumData) {
 
 function browseLetter(letter) {
     return request.get(process.env.SCRAPER_URL + '/browse_bands/' + letter).then(bands => {
-        log(JSON.parse(bands).length + ' bands found for letter ' + letter);
+        logger.info(JSON.parse(bands).length + ' bands found for letter ' + letter);
 
         JSON.parse(bands).forEach(band => {
             addBandToDatabase(band, false);
         });
         return Promise.resolve(true);
     }).catch(error => {
-        log('Failed browsing letter ' + letter + ' with status code: ' + error.statusCode);
+        logger.error('Failed browsing letter ' + letter + ' with status code: ' + error.statusCode);
         return Promise.resolve(false);
     });
 }
@@ -150,12 +153,6 @@ function fetchAlbumFromMetalArchives(albumData) {
     request.get(url).then(albumData => {
         addAlbumToDatabase(JSON.parse(albumData));
     }).catch(error => {
-        log('Failed fetching ' + albumData.url + ' with status code: ' + error.statusCode);
+        logger.error('Failed fetching ' + albumData.url + ' with status code: ' + error.statusCode);
     });
-}
-
-/* UTIL */
-
-function log(message) {
-    console.log(message);
 }

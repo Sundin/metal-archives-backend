@@ -2,6 +2,8 @@
 
 require('dotenv').config();
 
+const logger = require('./logger');
+
 const bandHandler = require('./bandHandler');
 const albumHandler = require('./albumHandler');
 
@@ -15,12 +17,13 @@ module.exports = {
     getBand: (event, context, callback) => {
         const { band_name, id } = event.pathParameters;
 
-        console.log('Get band by id', id);
+        logger.info('Get band by id', id);
 
         bandHandler.getBand(band_name, id).then(band => {
-            console.log('Triggering callback');
+            logger.info('Triggering callback');
             callback(null, { statusCode: 200, body: JSON.stringify(band) });
         }).catch(error => {
+            logger.error('get band failed', error.message);
             callback(null, createErrorResponse(error.statusCode, error.message));
         });
     },
@@ -28,12 +31,13 @@ module.exports = {
     getAlbum: (event, context, callback) => {
         const { album_id } = event.pathParameters;
 
-        console.log('Get album by id', album_id);
+        logger.info('Get album by id', album_id);
 
         albumHandler.getAlbum(album_id).then(album => {
-            console.log('Triggering callback');
+            logger.info('Triggering callback');
             callback(null, { statusCode: 200, body: JSON.stringify(album) });
         }).catch(error => {
+            logger.error('get album failed', error.message);
             callback(null, createErrorResponse(error.statusCode, error.message));
         });
     }

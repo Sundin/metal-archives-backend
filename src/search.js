@@ -7,6 +7,8 @@ mongoose.Promise = global.Promise;
 
 const request = require('request-promise-native');
 
+const logger = require('./logger');
+
 const Band = require('./models/band');
 const Album = require('./models/album');
 const Member = require('./models/member');
@@ -21,10 +23,9 @@ elasticsearchClient.ping({
     requestTimeout: 3000
 }, function(error) {
     if (error) {
-        console.trace('ElasticSearch cluster is down!');
-        log(error);
+        logger.error('ElasticSearch cluster is down!');
     } else {
-        log('ElasticSearch working properly');
+        logger.info('ElasticSearch working properly');
     }
 });
 
@@ -32,25 +33,24 @@ elasticsearchClient.ping({
 module.exports = {
     search: (query) => {
         return new Promise((resolve, reject) => {
-            log('GET /search/' + query);
+            logger.info('GET /search/' + query);
 
             if (!query) {
                 reject(new Error('Incomplete query'));
             }
 
-            log('searching for: ' + query);
             return Promise.all([
                 searchBand(query),
                 searchAlbum(query)
             ]).then(([bands, albums]) => {
-                log('Found results');
+                logger.info('Found results');
                 // TODO: album results
                 resolve({
                     query: query,
                     search_results: bands.hits.hits
                 });
             }).catch(error => {
-                log(error);
+                logger.error(error);
             });
         });
     }
@@ -90,10 +90,4 @@ function searchAlbum(query) {
             resolve(results);
         });
     });
-}
-
-/* UTIL */
-
-function log(message) {
-    console.log(message);
 }
