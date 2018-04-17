@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "deploy": "./deploy/deploy.sh"
+    "deploy": "./deploy/deploy.sh",
+    "lint": "node_modules/eslint/bin/eslint.js --fix ."
   },
   "author": "Gustav Sundin / Kicksort",
   "license": "ISC",
@@ -18,6 +19,8 @@
     "request-promise-native": "1.0.5"
   },
   "devDependencies": {
+    "eslint": "4.19.1",
+    "eslint-plugin-node": "6.0.1",
     "serverless": "1.26.1"
   }
 }
