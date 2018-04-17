@@ -1,17 +1,13 @@
 'use strict';
 
 const mongoose = require('mongoose');
-const mongoosastic = require('mongoosastic');
 mongoose.connect(process.env.MONGODB_URI, { useMongoClient: true });
 mongoose.Promise = global.Promise;
-
-const request = require('request-promise-native');
 
 const logger = require('./logger');
 
 const Band = require('./models/band');
 const Album = require('./models/album');
-const Member = require('./models/member');
 
 const elasticsearch = require('elasticsearch');
 const elasticsearchClient = new elasticsearch.Client({

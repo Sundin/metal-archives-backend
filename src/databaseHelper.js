@@ -23,7 +23,10 @@ function indexModel(model) {
 
     logger.info('indexing database...');
 
-    stream.on('data', function(err, doc) {
+    stream.on('data', function(error) {
+        if (error) {
+            logger.error(error);
+        }
         count++;
     });
     stream.on('close', function() {

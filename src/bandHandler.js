@@ -7,18 +7,17 @@ const logger = require('./logger');
 
 const Band = require('./models/band');
 const Album = require('./models/album');
-const Member = require('./models/member');
 
 module.exports = {
-    getBand: (band_name, id) => {
-        logger.info('GET /bands/' + band_name + '/' + id);
+    getBand: (bandName, id) => {
+        logger.info('GET /bands/' + bandName + '/' + id);
 
         mongoose.connect(process.env.MONGODB_URI, { useMongoClient: true });
         mongoose.Promise = global.Promise;
         const db = mongoose.connection;
 
         return new Promise(function(resolve, reject) {
-            if (!id || !band_name) {
+            if (!id || !bandName) {
                 reject(new Error('Missing parameters'));
             }
 
@@ -34,7 +33,7 @@ module.exports = {
                     const ONE_MONTH_AGO = Date.now() - 30 * ONE_DAY_IN_MILLISECONDS;
                     if (!band || !band.lastCrawlTimestamp || band.lastCrawlTimestamp < ONE_MONTH_AGO) {
                         logger.info('Need to fetch band data from Metal Archives');
-                        const url = process.env.SCRAPER_URL + '/bands/' + band_name + '/' + id;
+                        const url = process.env.SCRAPER_URL + '/bands/' + bandName + '/' + id;
                         request.get(url).then(bandData => {
                             resolve(band);
                             db.close();
@@ -65,7 +64,7 @@ module.exports = {
 
         let count = 0;
         ALL_LETTERS.forEach(letter => {
-            browseLetter(letter).then(result => {
+            browseLetter(letter).then(() => {
                 count++;
 
                 if (count >= ALL_LETTERS.length) {
@@ -105,12 +104,12 @@ function addBandToDatabase(bandData, updateTimestamp) {
         bandData.lastCrawlTimestamp = Date.now();
     }
 
-    Band.findOneAndUpdate({_id: bandData._id}, bandData, {upsert: true, returnNewDocument: true}, function(error, data) {
+    Band.findOneAndUpdate({_id: bandData._id}, bandData, {upsert: true, returnNewDocument: true}, function(error) {
         if (error) {
             logger.error(error);
             return;
         }
-        logger.info(bandData.band_name + ': band added to database');
+        logger.info(bandData.bandName + ': band added to database');
     });
 
     if (bandData.discography) {
@@ -121,7 +120,7 @@ function addBandToDatabase(bandData, updateTimestamp) {
 }
 
 function addAlbumToDatabase(albumData) {
-    Album.findOneAndUpdate({_id: albumData._id}, albumData, {upsert: true, returnNewDocument: true}, function(error, data) {
+    Album.findOneAndUpdate({_id: albumData._id}, albumData, {upsert: true, returnNewDocument: true}, function(error) {
         if (error) {
             logger.error(error);
             return;
@@ -150,8 +149,8 @@ function browseLetter(letter) {
 
 function fetchAlbumFromMetalArchives(albumData) {
     const url = albumData.url.replace('https://www.metal-archives.com', process.env.SCRAPER_URL);
-    request.get(url).then(albumData => {
-        addAlbumToDatabase(JSON.parse(albumData));
+    request.get(url).then(album => {
+        addAlbumToDatabase(JSON.parse(album));
     }).catch(error => {
         logger.error('Failed fetching ' + albumData.url + ' with status code: ' + error.statusCode);
     });

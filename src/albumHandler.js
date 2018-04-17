@@ -7,11 +7,11 @@ const Album = require('./models/album');
 
 module.exports = {
     // Note: maybe /album/:band/:title/:id, in case we need to crawl Metal Archives
-    getAlbum: (album_id) => {
+    getAlbum: (albumId) => {
         return new Promise((resolve, reject) => {
-            logger.info('GET /albums/' + album_id);
+            logger.info('GET /albums/' + albumId);
 
-            if (!album_id) {
+            if (!albumId) {
                 reject(new Error('Incomplete query'));
             }
 
@@ -20,14 +20,14 @@ module.exports = {
             const db = mongoose.connection;
 
             db.once('connected', () => {
-                Album.find({_id: album_id}, (error, result) => {
+                Album.find({_id: albumId}, (error, result) => {
                     if (error) {
                         reject(error);
                         db.close();
                     }
 
                     if (result.length > 1) {
-                        logger.warn('MULTIPLE ALBUMS WITH SAME ID: ' + album_id + ' !!!!!!!!!!!!!!!!');
+                        logger.warn('MULTIPLE ALBUMS WITH SAME ID: ' + albumId + ' !!!!!!!!!!!!!!!!');
                     }
 
                     const album = result[0];

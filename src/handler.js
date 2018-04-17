@@ -15,11 +15,11 @@ const createErrorResponse = (statusCode, message) => ({
 
 module.exports = {
     getBand: (event, context, callback) => {
-        const { band_name, id } = event.pathParameters;
+        const { bandName, id } = event.pathParameters;
 
         logger.info('Get band by id', id);
 
-        bandHandler.getBand(band_name, id).then(band => {
+        bandHandler.getBand(bandName, id).then(band => {
             logger.info('Triggering callback');
             callback(null, { statusCode: 200, body: JSON.stringify(band) });
         }).catch(error => {
@@ -29,11 +29,11 @@ module.exports = {
     },
 
     getAlbum: (event, context, callback) => {
-        const { album_id } = event.pathParameters;
+        const { albumId } = event.pathParameters;
 
-        logger.info('Get album by id', album_id);
+        logger.info('Get album by id', albumId);
 
-        albumHandler.getAlbum(album_id).then(album => {
+        albumHandler.getAlbum(albumId).then(album => {
             logger.info('Triggering callback');
             callback(null, { statusCode: 200, body: JSON.stringify(album) });
         }).catch(error => {

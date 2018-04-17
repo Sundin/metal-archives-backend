@@ -28,12 +28,12 @@ functions:
     description: Test
     events:
       - http: 
-          path: bands/{band_name}/{id}
+          path: bands/{bandName}/{id}
           method: get
           request:
             parameters: 
                paths: 
-                  band_name: true
+                  bandName: true
                   id: true
 
   get-album:
@@ -42,9 +42,9 @@ functions:
     description: Test
     events:
       - http: 
-          path: albums/{album_id}
+          path: albums/{albumId}
           method: get
           request: 
             parameters: 
                paths: 
-                  album_id: true
+                  albumId: true
