@@ -23,7 +23,7 @@ package:
 functions:
 
   get-band:
-    handler: handler.getBand
+    handler: src/handler.getBand
     memorySize: 128
     description: Test
     events:
@@ -37,7 +37,7 @@ functions:
                   id: true
 
   get-album:
-    handler: handler.getAlbum
+    handler: src/handler.getAlbum
     memorySize: 128
     description: Test
     events:
