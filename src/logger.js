@@ -3,15 +3,15 @@
 'use strict';
 
 module.exports = {
-    info: (message) => {
-        console.log(message);
+    info: (message, object) => {
+        console.log(message, object || '');
     },
 
-    warn: (message) => {
-        console.warn(message);
+    warn: (message, object) => {
+        console.warn(message, object || '');
     },
 
-    error: (message) => {
-        console.error(message);
+    error: (message, object) => {
+        console.error(message, object || '');
     }
 };

@@ -5,7 +5,6 @@ require('dotenv').config();
 const logger = require('./logger');
 
 const bandHandler = require('./bandHandler');
-const albumHandler = require('./albumHandler');
 
 const createErrorResponse = (statusCode, message) => ({
     statusCode: statusCode || 501,
@@ -17,7 +16,7 @@ module.exports = {
     getBand: (event, context, callback) => {
         const { bandName, id } = event.pathParameters;
 
-        logger.info('Get band by id', id);
+        logger.info('GET /bands/' + bandName + '/' + id);
 
         bandHandler.getBand(bandName, id).then(band => {
             logger.info('Triggering callback');
@@ -31,7 +30,9 @@ module.exports = {
     getAlbum: (event, context, callback) => {
         const { albumId } = event.pathParameters;
 
-        logger.info('Get album by id', albumId);
+        logger.info('GET /albums/' + albumId);
+
+        const albumHandler = require('./albumHandler');
 
         albumHandler.getAlbum(albumId).then(album => {
             logger.info('Triggering callback');

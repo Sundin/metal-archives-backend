@@ -10,22 +10,22 @@ const Album = require('./models/album');
 
 module.exports = {
     getBand: (bandName, id) => {
-        logger.info('GET /bands/' + bandName + '/' + id);
+        logger.info('Get band by id', id);
 
         mongoose.connect(process.env.MONGODB_URI, { useMongoClient: true });
         mongoose.Promise = global.Promise;
         const db = mongoose.connection;
 
-        return new Promise(function(resolve, reject) {
+        return new Promise((resolve, reject) => {
             if (!id || !bandName) {
-                reject(new Error('Missing parameters'));
+                return reject(new Error('Missing parameters'));
             }
 
             logger.info('searching...');
 
-            db.once('connected', () => {
+            return db.once('connected', () => {
                 logger.info('connected to mongo');
-                Band.find({_id: id}).then(result => {
+                return Band.find({_id: id}).then(result => {
                     logger.info('got result!');
 
                     const band = result[0];

@@ -9,18 +9,18 @@ module.exports = {
     // Note: maybe /album/:band/:title/:id, in case we need to crawl Metal Archives
     getAlbum: (albumId) => {
         return new Promise((resolve, reject) => {
-            logger.info('GET /albums/' + albumId);
+            logger.info('Get album by id', albumId);
 
             if (!albumId) {
-                reject(new Error('Incomplete query'));
+                return reject(new Error('Incomplete query'));
             }
 
             mongoose.connect(process.env.MONGODB_URI, { useMongoClient: true });
             mongoose.Promise = global.Promise;
             const db = mongoose.connection;
 
-            db.once('connected', () => {
-                Album.find({_id: albumId}, (error, result) => {
+            return db.once('connected', () => {
+                return Album.find({_id: albumId}, (error, result) => {
                     if (error) {
                         reject(error);
                         db.close();
