@@ -1,6 +1,6 @@
 'use strict';
 
-// const mongoosastic = require('mongoosastic');
+const mongoosastic = require('mongoosastic');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
@@ -69,11 +69,15 @@ const BandSchema = new Schema({
     lastCrawlTimestamp: { type: Date }
 });
 
-// BandSchema.plugin(mongoosastic);
+BandSchema.plugin(mongoosastic, {
+    host: 'ori-eu-west-1.searchly.com',
+    auth: 'paas:39f011cfa7ff78463dfbcb5868d5e490',
+    port: 80
+});
 
 const Band = mongoose.model('Band', BandSchema);
 
-// Band.createMapping({}, function(err, mapping){
+// Band.createMapping({}, function(err, mapping) {
 //     if (err) {
 //       console.log('error creating mapping (you can safely ignore this)');
 //       console.log(err);
@@ -84,3 +88,4 @@ const Band = mongoose.model('Band', BandSchema);
 // });
 
 module.exports = Band;
+module.exports.Schema = BandSchema;

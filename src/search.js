@@ -4,6 +4,8 @@ const mongoose = require('mongoose');
 mongoose.connect(process.env.MONGODB_URI, { useMongoClient: true });
 mongoose.Promise = global.Promise;
 
+const mongoosastic = require('mongoosastic');
+
 const logger = require('./logger');
 
 const Band = require('./models/band');
@@ -15,38 +17,46 @@ const elasticsearchClient = new elasticsearch.Client({
     log: 'trace'
 });
 
-elasticsearchClient.ping({
-    requestTimeout: 3000
-}, function(error) {
-    if (error) {
-        logger.error('ElasticSearch cluster is down!');
-    } else {
-        logger.info('ElasticSearch working properly');
-    }
-});
-
+function connect() {
+    return new Promise((resolve, reject) => {
+        elasticsearchClient.ping({
+            requestTimeout: 3000
+        }, function(error) {
+            if (error) {
+                logger.error('ElasticSearch cluster is down!');
+                reject(new Error('ElasticSearch cluster is down!'));
+            } else {
+                logger.info('ElasticSearch working properly');
+                resolve();
+            }
+        });
+    });
+}
 
 module.exports = {
     search: (query) => {
         return new Promise((resolve, reject) => {
-            logger.info('GET /search/' + query);
+            logger.info('Searching for ' + query);
 
             if (!query) {
                 reject(new Error('Incomplete query'));
             }
 
-            return Promise.all([
-                searchBand(query),
-                searchAlbum(query)
-            ]).then(([bands, albums]) => {
-                logger.info('Found results');
-                // TODO: album results
-                resolve({
-                    query: query,
-                    search_results: bands.hits.hits
+            return connect().then(() => {
+                return Promise.all([
+                    searchBand(query),
+                    //searchAlbum(query)
+                ]).then(([bands]) => {
+                    logger.info('Found results');
+                    // TODO: album results
+                    resolve({
+                        query: query,
+                        search_results: bands.hits.hits
+                    });
                 });
             }).catch(error => {
                 logger.error(error);
+                reject(error);
             });
         });
     }

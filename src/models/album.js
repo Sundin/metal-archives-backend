@@ -1,6 +1,6 @@
 'use strict';
 
-// const mongoosastic = require('mongoosastic');
+const mongoosastic = require('mongoosastic');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
@@ -43,7 +43,7 @@ const AlbumSchema = new Schema({
     lineup: [ MemberSchema ]
 });
 
-// AlbumSchema.plugin(mongoosastic);
+AlbumSchema.plugin(mongoosastic);
 
 const Album = mongoose.model('Album', AlbumSchema);
 

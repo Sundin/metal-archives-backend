@@ -25,7 +25,7 @@ functions:
   get-band:
     handler: src/handler.getBand
     memorySize: 128
-    description: Test
+    description: Get band
     events:
       - http: 
           path: bands/{bandName}/{id}
@@ -39,7 +39,7 @@ functions:
   get-album:
     handler: src/handler.getAlbum
     memorySize: 128
-    description: Test
+    description: Get album
     events:
       - http: 
           path: albums/{albumId}
@@ -48,3 +48,16 @@ functions:
             parameters: 
                paths: 
                   albumId: true
+
+  search:
+    handler: src/handler.search
+    memorySize: 128
+    description: Search for band or album name
+    events:
+      - http: 
+          path: search/{query}
+          method: get
+          request: 
+            parameters: 
+               paths: 
+                  query: true

@@ -41,5 +41,21 @@ module.exports = {
             logger.error('get album failed', error.message);
             callback(null, createErrorResponse(error.statusCode, error.message));
         });
+    },
+
+    search: (event, context, callback) => {
+        const { query } = event.pathParameters;
+
+        logger.info('GET /search/' + query);
+
+        const searchHandler = require('./search');
+
+        searchHandler.search(query).then(results => {
+            logger.info('Triggering callback');
+            callback(null, { statusCode: 200, body: JSON.stringify(results) });
+        }).catch(error => {
+            logger.error('search failed', error.message);
+            callback(null, createErrorResponse(error.statusCode, error.message));
+        });
     }
 };
