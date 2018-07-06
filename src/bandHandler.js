@@ -31,25 +31,26 @@ module.exports = {
                     const band = result[0];
                     const ONE_DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
                     const ONE_MONTH_AGO = Date.now() - 30 * ONE_DAY_IN_MILLISECONDS;
-                    if (!band || !band.lastCrawlTimestamp || band.lastCrawlTimestamp < ONE_MONTH_AGO) {
+                    if (!band || !band.last_crawl_timestamp || band.last_crawl_timestamp < ONE_MONTH_AGO) {
                         logger.info('Need to fetch band data from Metal Archives');
                         const url = process.env.SCRAPER_URL + '/bands/' + bandName + '/' + id;
                         request.get(url).then(bandData => {
-                            resolve(band);
-                            db.close();
-                            addBandToDatabase(JSON.parse(bandData), true);
+                            addBandToDatabase(JSON.parse(bandData), true).then(() => {
+                                db.close();
+                                resolve(band);
+                            });
                         }).catch(error => {
-                            reject(new Error(url + ' failed with status code: ' + error.statusCode));
                             db.close();
+                            reject(new Error(url + ' failed with status code: ' + error.statusCode));
                         });
                     } else {
                         logger.info('Band already in database');
-                        resolve(band);
                         db.close();
+                        resolve(band);
                     }
                 }).catch(error => {
-                    reject(error);
                     db.close();
+                    reject(error);
                 });
             });
         });
@@ -101,31 +102,31 @@ module.exports = {
 
 function addBandToDatabase(bandData, updateTimestamp) {
     if (updateTimestamp) {
-        bandData.lastCrawlTimestamp = Date.now();
+        bandData.last_crawl_timestamp = Date.now();
     }
 
-    Band.findOneAndUpdate({_id: bandData._id}, bandData, {upsert: true, returnNewDocument: true}, function(error) {
-        if (error) {
-            logger.error(error);
-            return;
+    return Band.findOneAndUpdate({_id: bandData._id}, bandData, {upsert: true, returnNewDocument: true}).then(() => {
+        logger.info(bandData.band_name + ': band added to database');
+
+        if (bandData.discography) {
+            return Promise.all(bandData.discography.map(album => {
+                fetchAlbumFromMetalArchives(album);
+            }));
         }
-        logger.info(bandData.bandName + ': band added to database');
+        return Promise.resolve();
+    }).catch(error => {
+        logger.error(error);
+        return Promise.reject(error);
     });
-
-    if (bandData.discography) {
-        bandData.discography.forEach(album => {
-            fetchAlbumFromMetalArchives(album);
-        });
-    }
 }
 
 function addAlbumToDatabase(albumData) {
-    Album.findOneAndUpdate({_id: albumData._id}, albumData, {upsert: true, returnNewDocument: true}, function(error) {
-        if (error) {
-            logger.error(error);
-            return;
-        }
+    Album.findOneAndUpdate({_id: albumData._id}, albumData, {upsert: true, returnNewDocument: true}).then(() => {
         logger.info(albumData.title + ': album added to database');
+        return Promise.resolve();
+    }).catch(error => {
+        logger.error(error);
+        return Promise.reject(error);
     });
 }
 

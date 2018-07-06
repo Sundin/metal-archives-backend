@@ -66,7 +66,7 @@ const BandSchema = new Schema({
         genre: String,
         score: String
     } ],
-    lastCrawlTimestamp: { type: Date }
+    last_crawl_timestamp: { type: Date }
 });
 
 BandSchema.plugin(mongoosastic, {
