@@ -23,7 +23,8 @@ Create a folder named `data`.
 
 `elasticsearch`
 
-TODO: Add configuration for running the lambdas locally.
+## Running a lambda locally
+Copy the example launch configuration files from `documentation/launchConfig` and put into your `.vscode` folder. You can now trigger the lambdas locally through the Debug tab of VS Code.
 
 ## Environment variables
 At the moment you need to modify four different files if you want to add an environment variable: `serverless.yaml`, `.env` (for running locally), `deploy/production.env` and `deploy/config.js`.
