@@ -8,14 +8,14 @@ const Band = require('./models/band');
 const Album = require('./models/album');
 const Member = require('./models/member');
 
-function indexDatabase() {
+module.exports.indexDatabase = () => {
     mongoose.connect(process.env.MONGODB_URI, { useMongoClient: true });
     mongoose.Promise = global.Promise;
 
     indexModel(Band);
     indexModel(Album);
     indexModel(Member);
-}
+};
 
 function indexModel(model) {
     var stream = model.synchronize();

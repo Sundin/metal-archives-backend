@@ -45,6 +45,21 @@ module.exports = {
 
     search: (event, context, callback) => {
         const { query } = event.pathParameters;
+        if (!query) {
+            callback(null, createErrorResponse(400, 'No search query'));
+        }
+
+        bandHandler.searchForBand(query).then(foundBands => {
+            logger.info('Triggering callback');
+            callback(null, { statusCode: 200, body: JSON.stringify(foundBands) });
+        }).catch(error => {
+            logger.error('search failed', error.message);
+            callback(null, createErrorResponse(error.statusCode, error.message));
+        });
+    },
+
+    searchUsingElasticSearch: (event, context, callback) => {
+        const { query } = event.pathParameters;
 
         logger.info('GET /search/' + query);
 

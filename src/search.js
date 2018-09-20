@@ -47,7 +47,7 @@ module.exports = {
                     searchBand(query),
                     //searchAlbum(query)
                 ]).then(([bands]) => {
-                    logger.info('Found results');
+                    logger.info('Found ' + bands.hits.hits.length + ' results');
                     // TODO: album results
                     resolve({
                         query: query,

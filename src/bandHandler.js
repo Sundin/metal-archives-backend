@@ -56,6 +56,28 @@ module.exports = {
         });
     },
 
+    searchForBand: (query) => {
+        logger.info('Searching for: ' + query);
+
+        mongoose.connect(process.env.MONGODB_URI, { useMongoClient: true });
+        mongoose.Promise = global.Promise;
+        const db = mongoose.connection;
+
+        return new Promise((resolve, reject) => {
+            return db.once('connected', () => {
+                logger.info('connected to mongo');
+                const regex = new RegExp(escapeRegex(query), 'gi');
+                return Band.find({ 'band_name': regex }).then(foundBands => {
+                    db.close();
+                    resolve(foundBands);
+                });
+            }).catch(error => {
+                db.close();
+                reject(error);
+            });
+        });
+    },
+
     /* CRAWLER */
 
     browseAllBands: () => {
@@ -155,4 +177,8 @@ function fetchAlbumFromMetalArchives(albumData) {
     }).catch(error => {
         logger.error('Failed fetching ' + albumData.url + ' with status code: ' + error.statusCode);
     });
+}
+
+function escapeRegex(text) {
+    return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '$&');
 }
