@@ -30,9 +30,9 @@ function countBands(letter) {
                 const lowerCase = letter.toLowerCase().charAt(0);
                 regex = new RegExp('(^' + upperCase + '.*)|(^' + lowerCase + '.*)');
             }
-            return Band.count({band_name: regex}).then(result => {
-                logger.info('got result!');
-                resolve(result);
+            return Band.countDocuments({band_name: regex}).then(bandCount => {
+                logger.info('Found ' + bandCount + ' bands');
+                resolve(bandCount);
             }).catch(error => {
                 db.close();
                 reject(error);
