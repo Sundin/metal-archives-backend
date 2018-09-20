@@ -9,7 +9,7 @@ const Album = require('./models/album');
 const Member = require('./models/member');
 
 module.exports.indexDatabase = () => {
-    mongoose.connect(process.env.MONGODB_URI, { useMongoClient: true });
+    mongoose.connect(process.env.MONGODB_URI);
     mongoose.Promise = global.Promise;
 
     indexModel(Band);

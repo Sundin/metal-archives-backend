@@ -18,9 +18,7 @@ const BandSchema = new Schema({
         es_indexed: true
     },
     _id: {
-        type: String,
-        unique: true,
-        required: true
+        type: String
     },
     country: {
         type: String,

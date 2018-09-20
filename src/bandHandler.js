@@ -17,7 +17,7 @@ const createErrorResponse = (statusCode, message) => ({
 function getBand(bandName, id) {
     logger.info('Get band by id', id);
 
-    mongoose.connect(process.env.MONGODB_URI, { useMongoClient: true });
+    mongoose.connect(process.env.MONGODB_URI);
     mongoose.Promise = global.Promise;
     const db = mongoose.connection;
 
@@ -79,7 +79,7 @@ module.exports = {
     searchForBand: (query) => {
         logger.info('Searching for: ' + query);
 
-        mongoose.connect(process.env.MONGODB_URI, { useMongoClient: true });
+        mongoose.connect(process.env.MONGODB_URI);
         mongoose.Promise = global.Promise;
         const db = mongoose.connection;
 
