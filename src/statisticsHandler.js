@@ -47,9 +47,13 @@ module.exports = {
 
         logger.info('GET /count-bands/' + letter);
 
-        countBands(letter).then(band => {
+        countBands(letter).then(bandCount => {
+            const response = {
+                letter: letter ? letter : 'all letters',
+                bandCount: bandCount
+            };
             logger.info('Triggering callback');
-            callback(null, { statusCode: 200, body: JSON.stringify(band) });
+            callback(null, { statusCode: 200, body: JSON.stringify(response) });
         }).catch(error => {
             logger.error('get band failed', error.message);
             callback(null, errorHandler.createErrorResponse(error.statusCode, error.message));
