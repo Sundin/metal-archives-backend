@@ -33,9 +33,9 @@ functions:
           method: get
           request:
             parameters: 
-               paths: 
-                  bandName: true
-                  id: true
+              paths: 
+                bandName: true
+                id: true
 
   get-album:
     handler: src/albumHandler.getAlbum
@@ -47,8 +47,8 @@ functions:
           method: get
           request: 
             parameters: 
-               paths: 
-                  albumId: true
+              paths: 
+                albumId: true
 
   search:
     handler: src/searchHandler.search
@@ -60,6 +60,18 @@ functions:
           method: get
           request: 
             parameters: 
-               paths: 
-                  query: true
-          
+              paths: 
+                query: true
+
+  count-bands:
+    handler: src/statisticsHandler.countBands
+    memorySize: 128
+    description: Count bands, all of them or for a specific letter
+    events:
+      - http: 
+          path: count-bands/{letter}
+          method: get
+          request: 
+            parameters: 
+              paths: 
+                letter: true

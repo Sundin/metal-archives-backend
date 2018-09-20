@@ -16,7 +16,7 @@
                 "--function",
                 "get-band",
                 "--path",
-                ".vscode/params/data.json"
+                ".vscode/params/band.json"
             ]
         },
 
