@@ -4,15 +4,10 @@ const mongoose = require('mongoose');
 const request = require('request-promise-native');
 
 const logger = require('./logger');
+const errorHandler = require('./util/errorHandler.js');
 
 const Band = require('./models/band');
 const Album = require('./models/album');
-
-const createErrorResponse = (statusCode, message) => ({
-    statusCode: statusCode || 501,
-    headers: { 'Content-Type': 'text/plain' },
-    body: message || 'Incorrect id'
-});
 
 function getBand(bandName, id) {
     logger.info('Get band by id', id);
@@ -72,7 +67,7 @@ module.exports = {
             callback(null, { statusCode: 200, body: JSON.stringify(band) });
         }).catch(error => {
             logger.error('get band failed', error.message);
-            callback(null, createErrorResponse(error.statusCode, error.message));
+            callback(null, errorHandler.createErrorResponse(error.statusCode, error.message));
         });
     },
 

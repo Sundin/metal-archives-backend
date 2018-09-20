@@ -3,13 +3,9 @@
 const mongoose = require('mongoose');
 
 const logger = require('./logger');
-const Album = require('./models/album');
+const errorHandler = require('./util/errorHandler.js');
 
-const createErrorResponse = (statusCode, message) => ({
-    statusCode: statusCode || 501,
-    headers: { 'Content-Type': 'text/plain' },
-    body: message || 'Incorrect id'
-});
+const Album = require('./models/album');
 
 module.exports = {
     // Note: maybe /album/:band/:title/:id, in case we need to crawl Metal Archives
@@ -23,7 +19,7 @@ module.exports = {
             callback(null, { statusCode: 200, body: JSON.stringify(album) });
         }).catch(error => {
             logger.error('get album failed', error.message);
-            callback(null, createErrorResponse(error.statusCode, error.message));
+            callback(null, errorHandler.createErrorResponse(error.statusCode, error.message));
         });
     }
 };

@@ -7,6 +7,8 @@ mongoose.Promise = global.Promise;
 const mongoosastic = require('mongoosastic');
 
 const logger = require('./logger');
+const errorHandler = require('./util/errorHandler.js');
+
 const bandHandler = require('./bandHandler');
 const Band = require('./models/band');
 const Album = require('./models/album');
@@ -15,12 +17,6 @@ const elasticsearch = require('elasticsearch');
 const elasticsearchClient = new elasticsearch.Client({
     host: process.env.ELASTICSEARCH_URL,
     log: 'trace'
-});
-
-const createErrorResponse = (statusCode, message) => ({
-    statusCode: statusCode || 501,
-    headers: { 'Content-Type': 'text/plain' },
-    body: message || 'Incorrect id'
 });
 
 function connect() {
@@ -43,7 +39,7 @@ module.exports = {
     search: (event, context, callback) => {
         const { query } = event.pathParameters;
         if (!query) {
-            callback(null, createErrorResponse(400, 'No search query'));
+            callback(null, errorHandler.createErrorResponse(400, 'No search query'));
         }
 
         bandHandler.searchForBand(query).then(foundBands => {
