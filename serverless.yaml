@@ -4,6 +4,7 @@ provider:
   name: aws
   runtime: nodejs8.10
   region: eu-west-1
+  stage: ${opt:stage, 'dev'}
   profile: ${file(./deploy/config.${self:provider.stage}.js):getEnvVars.AWS_PROFILE}
   environment:
     SCRAPER_URL: ${file(./deploy/config.${self:provider.stage}.js):getEnvVars.SCRAPER_URL}
