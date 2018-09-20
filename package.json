@@ -11,7 +11,7 @@
   "author": "Gustav Sundin / Kicksort",
   "license": "ISC",
   "dependencies": {
-    "dotenv": "4.0.0",
+    "dotenv": "6.0.0",
     "elasticsearch": "13.3.1",
     "mongoosastic": "4.3.0",
     "mongoose": "4.13.0",
@@ -19,8 +19,8 @@
     "request-promise-native": "1.0.5"
   },
   "devDependencies": {
-    "eslint": "4.19.1",
-    "eslint-plugin-node": "6.0.1",
+    "eslint": "5.6.0",
+    "eslint-plugin-node": "7.0.1",
     "serverless": "1.32.0"
   }
 }
