@@ -3,7 +3,7 @@
 const mongoose = require('mongoose');
 const request = require('request-promise-native');
 
-const logger = require('./logger');
+const logger = require('./util/logger.js');
 const errorHandler = require('./util/errorHandler.js');
 
 const Band = require('./models/band');

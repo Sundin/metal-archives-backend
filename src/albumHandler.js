@@ -2,7 +2,7 @@
 
 const mongoose = require('mongoose');
 
-const logger = require('./logger');
+const logger = require('./util/logger.js');
 const errorHandler = require('./util/errorHandler.js');
 
 const Album = require('./models/album');

@@ -6,7 +6,7 @@ mongoose.Promise = global.Promise;
 
 const mongoosastic = require('mongoosastic');
 
-const logger = require('./logger');
+const logger = require('./util/logger.js');
 const errorHandler = require('./util/errorHandler.js');
 
 const bandHandler = require('./bandHandler');
