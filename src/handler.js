@@ -1,7 +1,5 @@
 'use strict';
 
-require('dotenv').config();
-
 const logger = require('./logger');
 
 const bandHandler = require('./bandHandler');

@@ -4,12 +4,12 @@ provider:
   name: aws
   runtime: nodejs8.10
   region: eu-west-1
-  profile: ${file(./deploy/config.js):getEnvVars.AWS_PROFILE}
+  profile: ${file(./deploy/config.${self:provider.stage}.js):getEnvVars.AWS_PROFILE}
   environment:
-    SCRAPER_URL: ${file(./deploy/config.js):getEnvVars.SCRAPER_URL}
-    MONGODB_URI: ${file(./deploy/config.js):getEnvVars.MONGODB_URI}
-    ELASTICSEARCH_URL: ${file(./deploy/config.js):getEnvVars.ELASTICSEARCH_URL}
-    PORT: ${file(./deploy/config.js):getEnvVars.PORT}
+    SCRAPER_URL: ${file(./deploy/config.${self:provider.stage}.js):getEnvVars.SCRAPER_URL}
+    MONGODB_URI: ${file(./deploy/config.${self:provider.stage}.js):getEnvVars.MONGODB_URI}
+    ELASTICSEARCH_URL: ${file(./deploy/config.${self:provider.stage}.js):getEnvVars.ELASTICSEARCH_URL}
+    PORT: ${file(./deploy/config.${self:provider.stage}.js):getEnvVars.PORT}
   iamRoleStatements:
       - Effect: Allow
         Action: "*"
@@ -61,3 +61,4 @@ functions:
             parameters: 
                paths: 
                   query: true
+          
