@@ -9,7 +9,11 @@ const errorHandler = require('./util/errorHandler.js');
 const Band = require('./models/band');
 
 function countBands(letter) {
-    logger.info('Counting bands starting with letter: ', letter);
+    if (letter) {
+        logger.info('Counting bands starting with letter: ', letter);
+    } else {
+        logger.info('Counting all bands in database');
+    }
 
     mongoose.connect(process.env.MONGODB_URI);
     mongoose.Promise = global.Promise;
@@ -20,9 +24,12 @@ function countBands(letter) {
 
         return db.once('connected', () => {
             logger.info('connected to mongo');
-            const upperCase = letter.toUpperCase().charAt(0);
-            const lowerCase = letter.toLowerCase().charAt(0);
-            const regex = new RegExp('(^' + upperCase + '.*)|(^' + lowerCase + '.*)');
+            let regex = new RegExp('.*');
+            if (letter) {
+                const upperCase = letter.toUpperCase().charAt(0);
+                const lowerCase = letter.toLowerCase().charAt(0);
+                regex = new RegExp('(^' + upperCase + '.*)|(^' + lowerCase + '.*)');
+            }
             return Band.count({band_name: regex}).then(result => {
                 logger.info('got result!');
                 resolve(result);
