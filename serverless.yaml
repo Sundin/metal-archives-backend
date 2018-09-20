@@ -23,7 +23,7 @@ package:
 functions:
 
   get-band:
-    handler: src/handler.getBand
+    handler: src/bandHandler.getBand
     memorySize: 128
     description: Get band
     events:
@@ -37,7 +37,7 @@ functions:
                   id: true
 
   get-album:
-    handler: src/handler.getAlbum
+    handler: src/albumHandler.getAlbum
     memorySize: 128
     description: Get album
     events:
@@ -50,7 +50,7 @@ functions:
                   albumId: true
 
   search:
-    handler: src/handler.search
+    handler: src/searchHandler.search
     memorySize: 128
     description: Search for band or album name
     events:

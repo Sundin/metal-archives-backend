@@ -8,51 +8,71 @@ const logger = require('./logger');
 const Band = require('./models/band');
 const Album = require('./models/album');
 
-module.exports = {
-    getBand: (bandName, id) => {
-        logger.info('Get band by id', id);
+const createErrorResponse = (statusCode, message) => ({
+    statusCode: statusCode || 501,
+    headers: { 'Content-Type': 'text/plain' },
+    body: message || 'Incorrect id'
+});
 
-        mongoose.connect(process.env.MONGODB_URI, { useMongoClient: true });
-        mongoose.Promise = global.Promise;
-        const db = mongoose.connection;
+function getBand(bandName, id) {
+    logger.info('Get band by id', id);
 
-        return new Promise((resolve, reject) => {
-            if (!id || !bandName) {
-                return reject(new Error('Missing parameters'));
-            }
+    mongoose.connect(process.env.MONGODB_URI, { useMongoClient: true });
+    mongoose.Promise = global.Promise;
+    const db = mongoose.connection;
 
-            logger.info('searching...');
+    return new Promise((resolve, reject) => {
+        if (!id || !bandName) {
+            return reject(new Error('Missing parameters'));
+        }
 
-            return db.once('connected', () => {
-                logger.info('connected to mongo');
-                return Band.find({_id: id}).then(result => {
-                    logger.info('got result!');
+        logger.info('searching...');
 
-                    const band = result[0];
-                    const ONE_DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
-                    const ONE_MONTH_AGO = Date.now() - 30 * ONE_DAY_IN_MILLISECONDS;
-                    if (!band || !band.last_crawl_timestamp || band.last_crawl_timestamp < ONE_MONTH_AGO) {
-                        logger.info('Need to fetch band data from Metal Archives');
-                        const url = process.env.SCRAPER_URL + '/bands/' + bandName + '/' + id;
-                        request.get(url).then(bandData => {
-                            addBandToDatabase(JSON.parse(bandData), true).then(() => {
-                                db.close();
-                                resolve(band);
-                            });
-                        }).catch(error => {
+        return db.once('connected', () => {
+            logger.info('connected to mongo');
+            return Band.find({_id: id}).then(result => {
+                logger.info('got result!');
+
+                const band = result[0];
+                const ONE_DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
+                const ONE_MONTH_AGO = Date.now() - 30 * ONE_DAY_IN_MILLISECONDS;
+                if (!band || !band.last_crawl_timestamp || band.last_crawl_timestamp < ONE_MONTH_AGO) {
+                    logger.info('Need to fetch band data from Metal Archives');
+                    const url = process.env.SCRAPER_URL + '/bands/' + bandName + '/' + id;
+                    request.get(url).then(bandData => {
+                        addBandToDatabase(JSON.parse(bandData), true).then(() => {
                             db.close();
-                            reject(new Error(url + ' failed with status code: ' + error.statusCode));
+                            resolve(band);
                         });
-                    } else {
-                        logger.info('Band already in database');
+                    }).catch(error => {
                         db.close();
-                        resolve(band);
-                    }
-                }).catch(error => {
+                        reject(new Error(url + ' failed with status code: ' + error.statusCode));
+                    });
+                } else {
+                    logger.info('Band already in database');
                     db.close();
-                    reject(error);
-                });
+                    resolve(band);
+                }
+            }).catch(error => {
+                db.close();
+                reject(error);
             });
+        });
+    });
+}
+
+module.exports = {
+    getBand: (event, context, callback) => {
+        const { bandName, id } = event.pathParameters;
+
+        logger.info('GET /bands/' + bandName + '/' + id);
+
+        getBand(bandName, id).then(band => {
+            logger.info('Triggering callback');
+            callback(null, { statusCode: 200, body: JSON.stringify(band) });
+        }).catch(error => {
+            logger.error('get band failed', error.message);
+            callback(null, createErrorResponse(error.statusCode, error.message));
         });
     },
 
