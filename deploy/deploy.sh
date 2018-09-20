@@ -3,7 +3,7 @@
 # TODO: get from environment file
 export AWS_PROFILE="kicksort"
 
-echo "Deploying..."
+echo "Deploying to production..."
 
 # TODO: write environment variables from .env file to serverless.yaml 
 
