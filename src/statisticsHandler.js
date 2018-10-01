@@ -32,6 +32,7 @@ function countBands(letter) {
             }
             return Band.countDocuments({band_name: regex}).then(bandCount => {
                 logger.info('Found ' + bandCount + ' bands');
+                db.close();
                 resolve(bandCount);
             }).catch(error => {
                 db.close();
