@@ -15,7 +15,7 @@ function countBands(letter) {
         logger.info('Counting all bands in database');
     }
 
-    mongoose.connect(process.env.MONGODB_URI);
+    mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true });
     mongoose.Promise = global.Promise;
     const db = mongoose.connection;
 

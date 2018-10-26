@@ -9,9 +9,9 @@ Then run `npm install`.
 
 ### MongoDB
 
-Install MongoDB.
+Install MongoDB: `brew install mongodb`.
 
-Create a folder named `data`.
+Create a folder named data: `mkdir data`.
 
 ### ElasticSearch
 

@@ -32,7 +32,7 @@ function getAlbum(albumId) {
             return reject(new Error('Incomplete query'));
         }
 
-        mongoose.connect(process.env.MONGODB_URI);
+        mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true });
         mongoose.Promise = global.Promise;
         const db = mongoose.connection;
 

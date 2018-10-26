@@ -12,7 +12,7 @@ const Album = require('./models/album');
 function getBand(bandName, id) {
     logger.info('Get band by id', id);
 
-    mongoose.connect(process.env.MONGODB_URI);
+    mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true });
     mongoose.Promise = global.Promise;
     const db = mongoose.connection;
 
@@ -74,7 +74,7 @@ module.exports = {
     searchForBand: (query) => {
         logger.info('Searching for: ' + query);
 
-        mongoose.connect(process.env.MONGODB_URI);
+        mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true });
         mongoose.Promise = global.Promise;
         const db = mongoose.connection;
 
