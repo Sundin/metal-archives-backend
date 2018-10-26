@@ -27,6 +27,7 @@ functions:
     handler: src/bandHandler.getBand
     memorySize: 128
     description: Get band
+    timeout: 12
     events:
       - http: 
           path: bands/{bandName}/{id}
@@ -54,6 +55,7 @@ functions:
     handler: src/searchHandler.search
     memorySize: 128
     description: Search for band or album name
+    timeout: 12
     events:
       - http: 
           path: search/{query}
