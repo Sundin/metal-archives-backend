@@ -49,7 +49,7 @@ module.exports = {
             callback(null, { statusCode: 200, body: JSON.stringify(foundBands) });
         }).catch(error => {
             logger.error('search failed', error.message);
-            callback(null, createErrorResponse(error.statusCode, error.message));
+            callback(null, errorHandler.createErrorResponse(error.statusCode, error.message));
         });
     },
 
@@ -66,7 +66,7 @@ module.exports = {
             callback(null, { statusCode: 200, body: JSON.stringify(results) });
         }).catch(error => {
             logger.error('search failed', error.message);
-            callback(null, createErrorResponse(error.statusCode, error.message));
+            callback(null, errorHandler.createErrorResponse(error.statusCode, error.message));
         });
     }
 };

@@ -3,9 +3,7 @@
 'use strict';
 
 require('dotenv').config();
-var Raven = require('raven');
-
-let useSentry = false;
+const Raven = require('raven');
 
 module.exports = {
     info: (message, object) => {
@@ -17,27 +15,26 @@ module.exports = {
     },
 
     error: (message, object) => {
-        if (!useSentry) {
-            console.error(message, object || '');
-            return;
-        }
-
-        Raven.captureMessage(message, {
-            level: 'error',
-            extra: object || {}
-        }, function(err, eventId) {
-            // The message has now been sent to Sentry
-        });
+        this.logSentryError(message, object);
+        console.error(message, object || '');
     },
 
     setupSentry: () => {
-        if (process.env.NODE_ENV !== 'production' || !process.env.SENTRY_KEY) {
-            return;
-        }
-
         Raven.config(process.env.SENTRY_KEY, {
             autoBreadcrumbs: true
         }).install();
-        useSentry = true;
+    },
+
+    logSentryError: (message, object) => {
+        const environment = process.env.ENVIRONMENT;
+        Raven.captureMessage(message, {
+            level: 'error',
+            extra: object || {},
+            tags: {
+                environment: environment
+            }
+        }, function(err, eventId) {
+            // The message has now been sent to Sentry
+        });
     }
 };

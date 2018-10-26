@@ -11,6 +11,8 @@ provider:
     MONGODB_URI: ${file(./deploy/config.${self:provider.stage}.js):getEnvVars.MONGODB_URI}
     ELASTICSEARCH_URL: ${file(./deploy/config.${self:provider.stage}.js):getEnvVars.ELASTICSEARCH_URL}
     PORT: ${file(./deploy/config.${self:provider.stage}.js):getEnvVars.PORT}
+    SENTRY_KEY: ${file(./deploy/config.${self:provider.stage}.js):getEnvVars.SENTRY_KEY}
+    ENVIRONMENT: ${file(./deploy/config.${self:provider.stage}.js):getEnvVars.ENVIRONMENT}
   iamRoleStatements:
       - Effect: Allow
         Action: "*"

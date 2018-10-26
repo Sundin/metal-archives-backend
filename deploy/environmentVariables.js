@@ -5,5 +5,7 @@ module.exports.getEnvVars = () => ({
     MONGODB_URI: process.env.MONGODB_URI,
     ELASTICSEARCH_URL: process.env.ELASTICSEARCH_URL,
     PORT: process.env.PORT,
-    AWS_PROFILE: process.env.AWS_PROFILE ? process.env.AWS_PROFILE : ''
+    AWS_PROFILE: process.env.AWS_PROFILE ? process.env.AWS_PROFILE : '',
+    SENTRY_KEY: process.env.SENTRY_KEY,
+    ENVIRONMENT: process.env.ENVIRONMENT
 });
