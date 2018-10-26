@@ -45,6 +45,7 @@ function countBands(letter) {
 module.exports = {
     countBands: (event, context, callback) => {
         const { letter } = event.pathParameters;
+        logger.setupSentry();
 
         logger.info('GET /count-bands/' + letter);
 

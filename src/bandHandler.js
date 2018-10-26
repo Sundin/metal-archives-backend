@@ -59,6 +59,7 @@ function getBand(bandName, id) {
 module.exports = {
     getBand: (event, context, callback) => {
         const { bandName, id } = event.pathParameters;
+        logger.setupSentry();
 
         logger.info('GET /bands/' + bandName + '/' + id);
 
@@ -72,6 +73,8 @@ module.exports = {
     },
 
     searchForBand: (query) => {
+        logger.setupSentry();
+
         logger.info('Searching for: ' + query);
 
         mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true });
@@ -96,6 +99,8 @@ module.exports = {
     /* CRAWLER */
 
     browseAllBands: () => {
+        logger.setupSentry();
+
         logger.info('GET /browse_all_bands/');
 
         const ALL_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'NBR', '~'];
@@ -114,6 +119,8 @@ module.exports = {
 
     browseBands: (letter) => {
         return new Promise((resolve, reject) => {
+            logger.setupSentry();
+
             logger.info('GET /browse_bands/' + letter);
 
             if (!letter) {

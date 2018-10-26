@@ -75,3 +75,16 @@ functions:
             parameters: 
               paths: 
                 letter: true
+
+  crawl-bands:
+    handler: src/crawler.crawlBands
+    memorySize: 128
+    description: Add bands to database
+    events:
+      - http:
+          path: crawl-bands/{letter}
+          method: get
+          request:
+            parameters:
+              paths:
+                letter: true

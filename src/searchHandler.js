@@ -38,6 +38,8 @@ function connect() {
 module.exports = {
     search: (event, context, callback) => {
         const { query } = event.pathParameters;
+        logger.setupSentry();
+
         if (!query) {
             callback(null, errorHandler.createErrorResponse(400, 'No search query'));
         }
@@ -53,6 +55,7 @@ module.exports = {
 
     searchUsingElasticSearch: (event, context, callback) => {
         const { query } = event.pathParameters;
+        logger.setupSentry();
 
         logger.info('GET /search/' + query);
 
@@ -78,8 +81,8 @@ function search(query) {
 
         return connect().then(() => {
             return Promise.all([
-                searchBand(query),
-                //searchAlbum(query)
+                searchBand(query)
+                // searchAlbum(query)
             ]).then(([bands]) => {
                 logger.info('Found ' + bands.hits.hits.length + ' results');
                 // TODO: album results

@@ -11,6 +11,7 @@ module.exports = {
     // Note: maybe /album/:band/:title/:id, in case we need to crawl Metal Archives
     getAlbum: (event, context, callback) => {
         const { albumId } = event.pathParameters;
+        logger.setupSentry();
 
         logger.info('GET /albums/' + albumId);
 

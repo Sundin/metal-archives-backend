@@ -12,7 +12,8 @@ const createErrorResponse = (statusCode, message) => ({
 
 module.exports = {
     crawlBands: (event, context, callback) => {
-        // const { bandName, id } = event.pathParameters;
+        const { letter } = event.pathParameters;
+        logger.setupSentry();
 
         logger.info('Crawling bands');
 
