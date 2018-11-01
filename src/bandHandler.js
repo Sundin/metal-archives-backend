@@ -98,13 +98,13 @@ module.exports = {
 
     /* CRAWLER */
 
-    browseBands: (letter) => {
+    browseBands: (letter, startIndex, maxBands) => {
         return new Promise((resolve, reject) => {
             logger.setupSentry();
 
             logger.info('GET /browse_bands/' + letter);
 
-            if (!letter) {
+            if (!letter || !startIndex || !maxBands) {
                 reject(new Error('Incomplete query'));
             }
 
@@ -113,15 +113,26 @@ module.exports = {
                 logger.info(bandCount + ' bands found for letter ' + letter);
 
                 const parsedBandData = JSON.parse(bands);
-                const startIndex = 2;
-                const maxBands = 2;
 
                 let promises = [];
                 for (var i = startIndex; i < startIndex + maxBands; i++) {
-                    promises.push(
-                        addBandToDatabaseUsingNewConnection(parsedBandData[i], false)
-                    );
+                    if (process.env.ENVIRONMENT === 'local') {
+                        promises.push(
+                            addBandToDatabaseUsingNewConnection(parsedBandData[i], false)
+                        );
+                    } else {
+                        promises.push(
+                            request.post({
+                                url: process.env.LAMBDA_BASE_URL + '/add-band',
+                                body: parsedBandData[i],
+                                json: true
+                            })
+                        );
+                    }
                 }
+
+                logger.info('Executing promises using ' + process.env.ENVIRONMENT + ' mode');
+
                 return Promise.all(promises).then(() => {
                     resolve({
                         bandCount: bandCount,
@@ -185,8 +196,6 @@ function addBandToDatabaseUsingNewConnection(bandData, updateTimestamp) {
         if (!bandData) {
             return reject(new Error('Missing parameters'));
         }
-
-        logger.info('searching...');
 
         return db.once('connected', () => {
             logger.info('connected to mongo');

@@ -73,7 +73,6 @@ functions:
     handler: src/statisticsHandler.countBands
     memorySize: 128
     description: Count bands, all of them or for a specific letter
-    timeout: 30
     events:
       - http: 
           path: count-bands/{letter}
@@ -87,14 +86,17 @@ functions:
     handler: src/crawler.crawlLetter
     memorySize: 128
     description: Crawl all bands starting with a certain letter
+    timeout: 30
     events:
       - http:
-          path: crawl-letter/{letter}
+          path: crawl-letter/{letter}/{startIndex}/{maxBands}
           method: get
           request:
             parameters:
               paths:
                 letter: true
+                startIndex: true
+                maxBands: true
 
   add-band:
     handler: src/bandHandler.addBandToDatabase

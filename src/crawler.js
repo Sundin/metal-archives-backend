@@ -12,12 +12,12 @@ const createErrorResponse = (statusCode, message) => ({
 
 module.exports = {
     crawlLetter: (event, context, callback) => {
-        const { letter } = event.pathParameters;
+        const { letter, startIndex, maxBands } = event.pathParameters;
         logger.setupSentry();
 
         logger.info('Crawling bands');
 
-        bandHandler.browseBands(letter).then(response => {
+        bandHandler.browseBands(letter, startIndex, maxBands).then(response => {
             logger.info('Triggering callback');
             callback(null, { statusCode: 200, body: JSON.stringify(response.bandCount) + ' bands found for letter ' + letter + '. ' + response.addedCount + ' of them were added to the database.' });
         }).catch(error => {
@@ -34,8 +34,11 @@ module.exports = {
         const ALL_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'NBR', '~'];
 
         let count = 0;
+        const startIndex = 0;
+        const maxBands = 2;
+
         ALL_LETTERS.forEach(letter => {
-            bandHandler.browseBands(letter).then(() => {
+            bandHandler.browseBands(letter, startIndex, maxBands).then(() => {
                 count++;
 
                 if (count >= ALL_LETTERS.length) {
