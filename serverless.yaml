@@ -73,6 +73,7 @@ functions:
     handler: src/statisticsHandler.countBands
     memorySize: 128
     description: Count bands, all of them or for a specific letter
+    timeout: 30
     events:
       - http: 
           path: count-bands/{letter}

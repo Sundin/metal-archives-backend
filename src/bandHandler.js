@@ -109,8 +109,9 @@ module.exports = {
             }
 
             request.get(process.env.SCRAPER_URL + '/browse_bands/' + letter).then(bands => {
-                logger.info(JSON.parse(bands).length + ' bands found for letter ' + letter);
-                resolve(bands);
+                const bandCount = JSON.parse(bands).length;
+                logger.info(bandCount + ' bands found for letter ' + letter);
+                resolve(bandCount);
 
                 // JSON.parse(bands).forEach(band => {
                 //     addBandToDatabaseUsingNewConnection(band, false);

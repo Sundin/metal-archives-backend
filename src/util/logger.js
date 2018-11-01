@@ -15,7 +15,7 @@ module.exports = {
     },
 
     error: (message, object) => {
-        this.logSentryError(message, object);
+        logSentryError(message, object);
         console.error(message, object || '');
     },
 
@@ -26,15 +26,19 @@ module.exports = {
     },
 
     logSentryError: (message, object) => {
-        const environment = process.env.ENVIRONMENT;
-        Raven.captureMessage(message, {
-            level: 'error',
-            extra: object || {},
-            tags: {
-                environment: environment
-            }
-        }, function(err, eventId) {
-            // The message has now been sent to Sentry
-        });
+        logSentryError(message, object);
     }
 };
+
+function logSentryError(message, object) {
+    const environment = process.env.ENVIRONMENT;
+    Raven.captureMessage(message, {
+        level: 'error',
+        extra: object || {},
+        tags: {
+            environment: environment
+        }
+    }, function(err, eventId) {
+        // The message has now been sent to Sentry
+    });
+}
