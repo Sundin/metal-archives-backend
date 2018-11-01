@@ -98,25 +98,6 @@ module.exports = {
 
     /* CRAWLER */
 
-    browseAllBands: () => {
-        logger.setupSentry();
-
-        logger.info('GET /browse_all_bands/');
-
-        const ALL_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'NBR', '~'];
-
-        let count = 0;
-        ALL_LETTERS.forEach(letter => {
-            browseLetter(letter).then(() => {
-                count++;
-
-                if (count >= ALL_LETTERS.length) {
-                    logger.info('DONE!!!!!!!!!!!!!!!!!!');
-                }
-            });
-        });
-    },
-
     browseBands: (letter) => {
         return new Promise((resolve, reject) => {
             logger.setupSentry();
@@ -131,13 +112,29 @@ module.exports = {
                 logger.info(JSON.parse(bands).length + ' bands found for letter ' + letter);
                 resolve(bands);
 
-                JSON.parse(bands).forEach(band => {
-                    addBandToDatabase(band, false);
-                });
+                // JSON.parse(bands).forEach(band => {
+                //     addBandToDatabaseUsingNewConnection(band, false);
+                // });
             }).catch(error => {
                 logger.error('Failed browsing letter ' + letter + ' with status code: ' + error.statusCode);
                 reject(new Error('Failed browsing letter ' + letter + ' with status code: ' + error.statusCode));
             });
+        });
+    },
+
+    addBandToDatabase: (event, context, callback) => {
+        const bandData = JSON.parse(event.body);
+        logger.setupSentry();
+
+        logger.info('POST band ' + bandData.band_name);
+        logger.info(bandData);
+
+        addBandToDatabaseUsingNewConnection(bandData, false).then(() => {
+            logger.info('Triggering callback');
+            callback(null, { statusCode: 200 });
+        }).catch(error => {
+            logger.error('add band to database failed', error.message);
+            callback(null, errorHandler.createErrorResponse(error.statusCode, error.message));
         });
     }
 };
@@ -164,6 +161,42 @@ function addBandToDatabase(bandData, updateTimestamp) {
     });
 }
 
+function addBandToDatabaseUsingNewConnection(bandData, updateTimestamp) {
+    logger.info('addBandToDatabaseUsingNewConnection');
+
+    mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true });
+    mongoose.Promise = global.Promise;
+    const db = mongoose.connection;
+
+    return new Promise((resolve, reject) => {
+        if (!bandData) {
+            return reject(new Error('Missing parameters'));
+        }
+
+        logger.info('searching...');
+
+        return db.once('connected', () => {
+            logger.info('connected to mongo');
+
+            return Band.findOneAndUpdate({_id: bandData._id}, bandData, {upsert: true, returnNewDocument: true}).then(() => {
+                logger.info(bandData.band_name + ': band added to database');
+
+                // if (bandData.discography) {
+                //     return Promise.all(bandData.discography.map(album => {
+                //         fetchAlbumFromMetalArchives(album);
+                //     }));
+                // }
+                db.close();
+                resolve();
+            }).catch(error => {
+                logger.error(error);
+                db.close();
+                reject(error);
+            });
+        });
+    });
+}
+
 function addAlbumToDatabase(albumData) {
     Album.findOneAndUpdate({_id: albumData._id}, albumData, {upsert: true, returnNewDocument: true}).then(() => {
         logger.info(albumData.title + ': album added to database');
@@ -171,22 +204,6 @@ function addAlbumToDatabase(albumData) {
     }).catch(error => {
         logger.error(error);
         return Promise.reject(error);
-    });
-}
-
-/* CRAWLER */
-
-function browseLetter(letter) {
-    return request.get(process.env.SCRAPER_URL + '/browse_bands/' + letter).then(bands => {
-        logger.info(JSON.parse(bands).length + ' bands found for letter ' + letter);
-
-        JSON.parse(bands).forEach(band => {
-            addBandToDatabase(band, false);
-        });
-        return Promise.resolve(true);
-    }).catch(error => {
-        logger.error('Failed browsing letter ' + letter + ' with status code: ' + error.statusCode);
-        return Promise.resolve(false);
     });
 }
 

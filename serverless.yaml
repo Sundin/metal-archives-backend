@@ -67,6 +67,8 @@ functions:
               paths: 
                 query: true
 
+# Admin functionality
+
   count-bands:
     handler: src/statisticsHandler.countBands
     memorySize: 128
@@ -80,15 +82,24 @@ functions:
               paths: 
                 letter: true
 
-  crawl-bands:
-    handler: src/crawler.crawlBands
+  crawl-letter:
+    handler: src/crawler.crawlLetter
     memorySize: 128
-    description: Add bands to database
+    description: Crawl all bands starting with a certain letter
     events:
       - http:
-          path: crawl-bands/{letter}
+          path: crawl-letter/{letter}
           method: get
           request:
             parameters:
               paths:
                 letter: true
+
+  add-band:
+    handler: src/bandHandler.addBandToDatabase
+    memorySize: 128
+    description: Add a specific band to database
+    events:
+      - http:
+          path: add-band
+          method: post
