@@ -17,9 +17,9 @@ module.exports = {
 
         logger.info('Crawling bands');
 
-        bandHandler.browseBands('A').then(bandCount => {
+        bandHandler.browseBands(letter).then(response => {
             logger.info('Triggering callback');
-            callback(null, { statusCode: 200, body: JSON.stringify(bandCount) + ' bands found for letter ' + letter });
+            callback(null, { statusCode: 200, body: JSON.stringify(response.bandCount) + ' bands found for letter ' + letter + '. ' + response.addedCount + ' of them were added to the database.' });
         }).catch(error => {
             logger.error('get band failed', error.message);
             callback(null, createErrorResponse(error.statusCode, error.message));

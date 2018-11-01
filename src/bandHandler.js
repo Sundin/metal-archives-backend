@@ -111,11 +111,23 @@ module.exports = {
             request.get(process.env.SCRAPER_URL + '/browse_bands/' + letter).then(bands => {
                 const bandCount = JSON.parse(bands).length;
                 logger.info(bandCount + ' bands found for letter ' + letter);
-                resolve(bandCount);
 
-                // JSON.parse(bands).forEach(band => {
-                //     addBandToDatabaseUsingNewConnection(band, false);
-                // });
+                const parsedBandData = JSON.parse(bands);
+                const startIndex = 2;
+                const maxBands = 2;
+
+                let promises = [];
+                for (var i = startIndex; i < startIndex + maxBands; i++) {
+                    promises.push(
+                        addBandToDatabaseUsingNewConnection(parsedBandData[i], false)
+                    );
+                }
+                return Promise.all(promises).then(() => {
+                    resolve({
+                        bandCount: bandCount,
+                        addedCount: promises.length
+                    });
+                });
             }).catch(error => {
                 logger.error('Failed browsing letter ' + letter + ' with status code: ' + error.statusCode);
                 reject(new Error('Failed browsing letter ' + letter + ' with status code: ' + error.statusCode));
