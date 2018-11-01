@@ -1,7 +1,8 @@
 'use strict';
 
-const logger = require('./util/logger');
+const request = require('request-promise-native');
 
+const logger = require('./util/logger');
 const bandHandler = require('./bandHandler');
 
 const createErrorResponse = (statusCode, message) => ({
@@ -17,7 +18,7 @@ module.exports = {
 
         logger.info('Crawling bands');
 
-        bandHandler.browseBands(letter, startIndex, maxBands).then(response => {
+        browseBands(letter, startIndex, maxBands).then(response => {
             logger.info('Triggering callback');
             callback(null, { statusCode: 200, body: JSON.stringify(response.bandCount) + ' bands found for letter ' + letter + '. ' + response.addedCount + ' of them were added to the database.' });
         }).catch(error => {
@@ -38,7 +39,7 @@ module.exports = {
         const maxBands = 2;
 
         ALL_LETTERS.forEach(letter => {
-            bandHandler.browseBands(letter, startIndex, maxBands).then(() => {
+            browseBands(letter, startIndex, maxBands).then(() => {
                 count++;
 
                 if (count >= ALL_LETTERS.length) {
@@ -48,3 +49,55 @@ module.exports = {
         });
     }
 };
+
+function browseBands(letter, startIndex, maxBands) {
+    return new Promise((resolve, reject) => {
+        logger.setupSentry();
+
+        logger.info('GET /browse_bands/' + letter);
+
+        if (!letter || !startIndex || !maxBands) {
+            reject(new Error('Incomplete query'));
+        }
+
+        request.get(process.env.SCRAPER_URL + '/browse_bands/' + letter).then(bands => {
+            const bandCount = JSON.parse(bands).length;
+            logger.info(bandCount + ' bands found for letter ' + letter);
+
+            const parsedBandData = JSON.parse(bands);
+
+            let promises = [];
+            for (var i = startIndex; i < startIndex + maxBands; i++) {
+                if (i > parsedBandData.length) {
+                    break;
+                }
+
+                if (process.env.ENVIRONMENT === 'local') {
+                    promises.push(
+                        bandHandler.addBandToDatabaseUsingNewConnection(parsedBandData[i], false)
+                    );
+                } else {
+                    promises.push(
+                        request.post({
+                            url: process.env.LAMBDA_BASE_URL + '/add-band',
+                            body: parsedBandData[i],
+                            json: true
+                        })
+                    );
+                }
+            }
+
+            logger.info('Executing promises using ' + process.env.ENVIRONMENT + ' mode');
+
+            return Promise.all(promises).then(() => {
+                resolve({
+                    bandCount: bandCount,
+                    addedCount: promises.length
+                });
+            });
+        }).catch(error => {
+            logger.error('Failed browsing letter ' + letter + ' with status code: ' + error.statusCode);
+            reject(new Error('Failed browsing letter ' + letter + ' with status code: ' + error.statusCode));
+        });
+    });
+}
