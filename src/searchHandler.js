@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true });
 mongoose.Promise = global.Promise;
 
-const mongoosastic = require('mongoosastic');
+// const mongoosastic = require('mongoosastic');
 
 const logger = require('./util/logger.js');
 const errorHandler = require('./util/errorHandler.js');

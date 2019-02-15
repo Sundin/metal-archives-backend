@@ -88,6 +88,9 @@ module.exports = {
                 return Band.find({ 'band_name': regex }).then(foundBands => {
                     db.close();
                     resolve(foundBands);
+                }).catch(error => {
+                    db.close();
+                    reject(error);
                 });
             }).catch(error => {
                 db.close();
