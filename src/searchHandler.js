@@ -17,7 +17,13 @@ module.exports = {
 
         searchOnMetalArchives(query).then(foundBands => {
             logger.info(`Got ${foundBands.length} results. Triggering callback`);
-            callback(null, { statusCode: 200, body: JSON.stringify(foundBands) });
+            callback(null, {
+                statusCode: 200,
+                headers: {
+                    'Content-Type': 'application/json; charset=utf-8'
+                },
+                body: JSON.stringify(foundBands)
+            });
         }).catch(error => {
             logger.error('search failed', error.message);
             callback(null, errorHandler.createErrorResponse(error.statusCode, error.message));

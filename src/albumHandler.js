@@ -17,7 +17,13 @@ module.exports = {
 
         getAlbum(albumId).then(album => {
             logger.info('Triggering callback');
-            callback(null, { statusCode: 200, body: JSON.stringify(album) });
+            callback(null, {
+                statusCode: 200,
+                headers: {
+                    'Content-Type': 'application/json; charset=utf-8'
+                },
+                body: JSON.stringify(album)
+            });
         }).catch(error => {
             logger.error('get album failed', error.message);
             callback(null, errorHandler.createErrorResponse(error.statusCode, error.message));
