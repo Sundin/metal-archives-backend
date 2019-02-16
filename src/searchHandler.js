@@ -4,6 +4,8 @@ const mongoose = require('mongoose');
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true });
 mongoose.Promise = global.Promise;
 
+const cheerio = require('cheerio');
+const request = require('request-promise-native');
 // const mongoosastic = require('mongoosastic');
 
 const logger = require('./util/logger.js');
@@ -44,7 +46,8 @@ module.exports = {
             callback(null, errorHandler.createErrorResponse(400, 'No search query'));
         }
 
-        bandHandler.searchForBand(query).then(foundBands => {
+        // bandHandler.searchForBandInMongoDB(query).then(foundBands => {
+        searchOnMetalArchives(query).then(foundBands => {
             logger.info('Triggering callback');
             callback(null, { statusCode: 200, body: JSON.stringify(foundBands) });
         }).catch(error => {
@@ -70,6 +73,37 @@ module.exports = {
         });
     }
 };
+
+function searchOnMetalArchives(query) {
+    return new Promise(function(resolve, reject) {
+        const url = `https://www.metal-archives.com/search/ajax-band-search/?field=name&query=${query}`;
+        return request.get(url).then(body => {
+            let jsonData = JSON.parse(body);
+            const results = jsonData.aaData;
+
+            let foundBands = [];
+            results.forEach(result => {
+                const $ = cheerio.load(result[0]);
+                // TODO: we are ignoring "A.K.A" section of band name for now
+                const bandName = $('a').text();
+                const bandUrl = $('a').attr('href');
+                const splitUrl = bandUrl.split('/');
+                const id = splitUrl[splitUrl.length - 1];
+                let band = {
+                    band_name: bandName,
+                    url: bandUrl,
+                    genre: result[1],
+                    country: result[2],
+                    _id: id
+                };
+                foundBands.push(band);
+            });
+            resolve(foundBands);
+        }).catch(error => {
+            reject(new Error(url + ' failed with status code: ' + error.statusCode));
+        });
+    });
+}
 
 function search(query) {
     return new Promise((resolve, reject) => {

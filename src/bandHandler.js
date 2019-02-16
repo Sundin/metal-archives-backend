@@ -72,7 +72,7 @@ module.exports = {
         });
     },
 
-    searchForBand: (query) => {
+    searchForBandInMongoDB: (query) => {
         logger.setupSentry();
 
         logger.info('Searching for: ' + query);
