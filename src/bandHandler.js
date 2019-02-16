@@ -37,7 +37,7 @@ function getBand(bandName, id) {
                     request.get(url).then(bandData => {
                         addBandToDatabase(JSON.parse(bandData), true).then(() => {
                             db.close();
-                            resolve(band);
+                            resolve(bandData);
                         });
                     }).catch(error => {
                         db.close();
