@@ -35,9 +35,10 @@ function getBand(bandName, id) {
                     logger.info('Need to fetch band data from Metal Archives');
                     const url = process.env.SCRAPER_URL + '/bands/' + bandName + '/' + id;
                     request.get(url).then(bandData => {
-                        addBandToDatabase(JSON.parse(bandData), true).then(() => {
+                        const parsedBandData = JSON.parse(bandData);
+                        addBandToDatabase(parsedBandData, true).then(() => {
                             db.close();
-                            resolve(bandData);
+                            resolve(parsedBandData);
                         });
                     }).catch(error => {
                         db.close();
