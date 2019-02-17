@@ -33,16 +33,14 @@ function getBand(bandName, id) {
                 const ONE_MONTH_AGO = Date.now() - 30 * ONE_DAY_IN_MILLISECONDS;
                 if (!band || !band.last_crawl_timestamp || band.last_crawl_timestamp < ONE_MONTH_AGO) {
                     logger.info('Need to fetch band data from Metal Archives');
-                    const url = process.env.SCRAPER_URL + '/bands/' + bandName + '/' + id;
-                    request.get(url).then(bandData => {
-                        const parsedBandData = JSON.parse(bandData);
-                        addBandToDatabase(parsedBandData, true).then(() => {
+                    scrapeMetalArchivesBandPage(bandName, id).then(bandData => {
+                        addBandToDatabase(bandData, true).then(() => {
                             db.close();
-                            resolve(parsedBandData);
+                            resolve(bandData);
                         });
                     }).catch(error => {
                         db.close();
-                        reject(new Error(url + ' failed with status code: ' + error.statusCode));
+                        reject(error);
                     });
                 } else {
                     logger.info('Band already in database');
@@ -208,4 +206,16 @@ function fetchAlbumFromMetalArchives(albumData) {
 
 function escapeRegex(text) {
     return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '$&');
+}
+
+function scrapeMetalArchivesBandPage(bandName, id) {
+    return new Promise((resolve, reject) => {
+        const url = process.env.SCRAPER_URL + '/bands/' + bandName + '/' + id;
+        request.get(url).then(bandData => {
+            const parsedBandData = JSON.parse(bandData);
+            resolve(parsedBandData);
+        }).catch(error => {
+            reject(new Error(url + ' failed with status code: ' + error.statusCode));
+        });
+    });
 }
