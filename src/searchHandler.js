@@ -33,7 +33,7 @@ module.exports = {
 
 function searchOnMetalArchives(query) {
     return new Promise(function(resolve, reject) {
-        const url = `https://www.metal-archives.com/search/ajax-band-search/?field=name&query=${query}`;
+        const url = `https://www.metal-archives.com/search/ajax-band-search/?field=name&query=${query}*`;
         return request.get(url).then(body => {
             logger.info('Got results from metal archives');
 
