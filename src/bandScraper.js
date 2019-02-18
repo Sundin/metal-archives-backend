@@ -50,8 +50,7 @@ module.exports = {
                         };
                         bandValues.label = label;
                     } else {
-                        // TODO: trim tabs in middle of string
-                        bandValues[bandKeys[i]] = $(elem).text().trim();
+                        bandValues[bandKeys[i]] = $(elem).text().trim().replace(/\s{2,}/g, ' ');
                     }
                 });
 
@@ -116,7 +115,7 @@ function getDiscography(bandId) {
             $('tbody tr').each(function(i, album) {
                 let disc = {};
                 $(album).find('td').each(function(j, item) {
-                    disc[discKeys[j]] = $(item).text().trim(); // TODO: trim tabs inside text?
+                    disc[discKeys[j]] = $(item).text().trim().replace(/\s{2,}/g, ' ');
                 });
                 const albumUrl = $(album).find('a').attr('href');
                 const splittedUrl = albumUrl.split('/');
@@ -148,7 +147,7 @@ function getMembers(page, type) {
     const $ = cheerio.load(page);
     $(`div#band_tab_members_${type} div table tr.lineupRow`).each(function(i, memberData) {
         $(memberData).find('td').each(function(j, item) {
-            member[memberKeys[(j + 2) % 2]] = $(item).text().trim(); // TODO: trim middle of string?
+            member[memberKeys[(j + 2) % 2]] = $(item).text().trim().replace(/\s{2,}/g, ' ');
             if ((j + 2) % 2 === 0) {
                 const url = $(item).find('a').attr('href');
                 const splittedUrl = url.split('/');
@@ -167,7 +166,7 @@ function getMembers(page, type) {
                 let otherBands = [];
                 $(item).find('a').each(function(j, also) {
                     let band = {};
-                    band.band_name = $(also).text().trim(); // TODO: trim middle of string?
+                    band.band_name = $(also).text().trim().replace(/\s{2,}/g, ' ');
                     const url = $(also).attr('href');
                     const splittedUrl = url.split('/');
                     band._id = splittedUrl[splittedUrl.length - 1];
