@@ -6,6 +6,7 @@ const request = require('request-promise-native');
 const logger = require('./util/logger.js');
 const errorHandler = require('./util/errorHandler.js');
 
+const bandScraper = require('./bandScraper.js');
 const Band = require('./models/band');
 const Album = require('./models/album');
 
@@ -33,7 +34,7 @@ function getBand(bandName, id) {
                 const ONE_MONTH_AGO = Date.now() - 30 * ONE_DAY_IN_MILLISECONDS;
                 if (!band || !band.last_crawl_timestamp || band.last_crawl_timestamp < ONE_MONTH_AGO) {
                     logger.info('Need to fetch band data from Metal Archives');
-                    scrapeMetalArchivesBandPage(bandName, id).then(bandData => {
+                    bandScraper.scrapeBandPage(id).then(bandData => {
                         addBandToDatabase(bandData, true).then(() => {
                             db.close();
                             resolve(bandData);
@@ -61,8 +62,8 @@ module.exports = {
         logger.setupSentry();
 
         logger.info('GET /bands/' + bandName + '/' + id);
-
-        getBand(bandName, id).then(band => {
+        // getBand(bandName, id).then(band => {
+        bandScraper.scrapeBandPage(id).then(band => {
             logger.info('Triggering callback');
             callback(null, {
                 statusCode: 200,
@@ -206,16 +207,4 @@ function fetchAlbumFromMetalArchives(albumData) {
 
 function escapeRegex(text) {
     return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '$&');
-}
-
-function scrapeMetalArchivesBandPage(bandName, id) {
-    return new Promise((resolve, reject) => {
-        const url = process.env.SCRAPER_URL + '/bands/' + bandName + '/' + id;
-        request.get(url).then(bandData => {
-            const parsedBandData = JSON.parse(bandData);
-            resolve(parsedBandData);
-        }).catch(error => {
-            reject(new Error(url + ' failed with status code: ' + error.statusCode));
-        });
-    });
 }

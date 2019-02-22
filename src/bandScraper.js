@@ -8,92 +8,104 @@ const logger = require('./util/logger.js');
 module.exports = {
     scrapeBandPage: (id) => {
         return new Promise((resolve, reject) => {
-            const url = 'https://www.metal-archives.com/band/view/id/' + id;
-            logger.info('Scraping ' + url);
-
-            request.get(url).then(body => {
-                const $ = cheerio.load(body);
-                const bandName = $('h1[class=band_name]').text();
-
-                const bandUrl = $('h1[class=band_name] a').attr('href');
-
-                const photoUrl = $('a[id=photo]').attr('href');
-                const logoUrl = $('a[id=logo]').attr('href');
-
-                let bandValues = {};
-
-                const bandKeys = [
-                    'country',
-                    'location',
-                    'status',
-                    'active_since',
-                    'genre',
-                    'themes',
-                    'label',
-                    'years_active'
-                ];
-
-                $('div#band_stats dd').each(function(i, elem) {
-                    if (i === 6) {
-                        const labelUrl = $(elem).find('a').attr('href');
-                        let labelId = '';
-                        if (labelUrl) {
-                            const splittedUrl = labelUrl.split('/');
-                            const splitAgain = splittedUrl[splittedUrl.length - 1].split('#');
-                            labelId = splitAgain[0];
-                        }
-
-                        const label = {
-                            _id: labelId,
-                            name: $(elem).text().trim(),
-                            url: labelUrl
-                        };
-                        bandValues.label = label;
-                    } else {
-                        bandValues[bandKeys[i]] = $(elem).text().trim().replace(/\s{2,}/g, ' ');
-                    }
-                });
-
-                const biography = $('div.band_comment').text().trim();
-
-                const members = {
-                    current: getMembers(body, 'current'),
-                    past: getMembers(body, 'past'),
-                    live: getMembers(body, 'live')
-                };
-
-                // TODO: make network requests in parallel
-                getDiscography(id).then(discography => {
-                    const bandData = {
-                        band_name: bandName,
-                        _id: id,
-                        country: bandValues.country,
-                        location: bandValues.location,
-                        status: bandValues.status,
-                        formed_in: bandValues.active_since,
-                        genre: bandValues.genre,
-                        themes: bandValues.themes,
-                        label: bandValues.label,
-                        years_active: bandValues.years_active,
-                        url: bandUrl,
-                        photo_url: photoUrl,
-                        logo_url: logoUrl,
-                        biography: biography,
-                        members: members,
-                        discography: discography
-                        // TODO: get links
-                        // TODO: get similar bands
-                    };
-
-                    resolve(bandData);
-                });
+            Promise.all([
+                getBandData(id),
+                getDiscography(id)
+            ]).then(results => {
+                let bandData = results[0];
+                bandData.discography = results[1];
+                resolve(bandData);
             }).catch(error => {
                 logger.error(error);
-                reject(new Error(url + ' failed with status code: ' + error.statusCode));
+                reject(new Error('Fetching band data failed with status code: ' + error.statusCode));
             });
         });
     }
 };
+
+function getBandData(bandId) {
+    return new Promise((resolve, reject) => {
+        const url = 'https://www.metal-archives.com/band/view/id/' + bandId;
+        logger.info('Scraping ' + url);
+
+        request.get(url).then(body => {
+            const $ = cheerio.load(body);
+            const bandName = $('h1[class=band_name]').text();
+
+            const bandUrl = $('h1[class=band_name] a').attr('href');
+
+            const photoUrl = $('a[id=photo]').attr('href');
+            const logoUrl = $('a[id=logo]').attr('href');
+
+            let bandValues = {};
+
+            const bandKeys = [
+                'country',
+                'location',
+                'status',
+                'active_since',
+                'genre',
+                'themes',
+                'label',
+                'years_active'
+            ];
+
+            $('div#band_stats dd').each(function(i, elem) {
+                if (i === 6) {
+                    const labelUrl = $(elem).find('a').attr('href');
+                    let labelId = '';
+                    if (labelUrl) {
+                        const splittedUrl = labelUrl.split('/');
+                        const splitAgain = splittedUrl[splittedUrl.length - 1].split('#');
+                        labelId = splitAgain[0];
+                    }
+
+                    const label = {
+                        _id: labelId,
+                        name: $(elem).text().trim(),
+                        url: labelUrl
+                    };
+                    bandValues.label = label;
+                } else {
+                    bandValues[bandKeys[i]] = $(elem).text().trim().replace(/\s{2,}/g, ' ');
+                }
+            });
+
+            const biography = $('div.band_comment').text().trim();
+
+            const members = {
+                current: getMembers(body, 'current'),
+                past: getMembers(body, 'past'),
+                live: getMembers(body, 'live')
+            };
+
+            const bandData = {
+                band_name: bandName,
+                _id: bandId,
+                country: bandValues.country,
+                location: bandValues.location,
+                status: bandValues.status,
+                formed_in: bandValues.active_since,
+                genre: bandValues.genre,
+                themes: bandValues.themes,
+                label: bandValues.label,
+                years_active: bandValues.years_active,
+                url: bandUrl,
+                photo_url: photoUrl,
+                logo_url: logoUrl,
+                biography: biography,
+                members: members
+                // TODO: get links
+                // TODO: get similar bands
+            };
+
+            resolve(bandData);
+        }).catch(error => {
+            logger.error(error);
+            reject(new Error(url + ' failed with status code: ' + error.statusCode));
+        });
+    });
+}
 
 function getDiscography(bandId) {
     return new Promise((resolve, reject) => {
