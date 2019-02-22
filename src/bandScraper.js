@@ -14,6 +14,7 @@ module.exports = {
             ]).then(results => {
                 let bandData = results[0];
                 bandData.discography = results[1];
+                bandData.data_version = 1; // Use this if you need to do breaking changes to data structure
                 resolve(bandData);
             }).catch(error => {
                 logger.error(error);
