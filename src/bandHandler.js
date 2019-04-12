@@ -155,6 +155,7 @@ function addBandToDatabaseUsingNewConnection(bandData, updateTimestamp) {
 
     mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true });
     mongoose.Promise = global.Promise;
+    mongoose.set('useFindAndModify', false);
     const db = mongoose.connection;
 
     return new Promise((resolve, reject) => {
