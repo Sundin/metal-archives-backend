@@ -57,6 +57,17 @@ function searchOnMetalArchives(query) {
                 };
                 foundBands.push(band);
             });
+
+            let exactMatches = [];
+            foundBands.forEach((band, index) => {
+                if (band.band_name.toLowerCase().startsWith(query.toLowerCase())) {
+                    exactMatches.push(band);
+                    foundBands.splice(index, 1);
+                }
+            });
+
+            foundBands = exactMatches.concat(foundBands);
+
             resolve(foundBands);
         }).catch(error => {
             reject(new Error(url + ' failed with status code: ' + error.statusCode));
