@@ -58,12 +58,28 @@ function getBand(id) {
 
 module.exports = {
     getBand: (event, context, callback) => {
-        const { id } = event.pathParameters;
+        const { id, forceRefresh } = event.pathParameters;
         logger.setupSentry();
 
         logger.info('GET /bands/' + id);
-        getBand(id).then(band => {
-        // bandScraper.scrapeBandPage(id).then(band => {
+
+        if (forceRefresh === true || forceRefresh === 'true') {
+            logger.info('Bypass database cache, force refreshing band by scraping');
+            return bandScraper.scrapeBandPage(id).then(bandData => {
+                callback(null, {
+                    statusCode: 200,
+                    headers: {
+                        'Content-Type': 'application/json; charset=utf-8'
+                    },
+                    body: JSON.stringify(bandData)
+                });
+            }).catch(error => {
+                logger.error('get band failed', error.message);
+                callback(null, errorHandler.createErrorResponse(error.statusCode, error.message));
+            });
+        }
+
+        return getBand(id).then(band => {
             logger.info('Triggering callback');
             callback(null, {
                 statusCode: 200,
