@@ -19,7 +19,7 @@ const AlbumSchema = new Schema({
     _id: {
         type: String
     },
-    year: String,
+    year: Number,
     type: String,
     url: String,
     reviews: String,

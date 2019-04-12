@@ -22,7 +22,7 @@ module.exports = {
                 headers: {
                     'Content-Type': 'application/json; charset=utf-8'
                 },
-                body: albumData
+                body: JSON.stringify(albumData)
             });
         }).catch(dbError => {
             logger.info(dbError.message);
@@ -71,12 +71,8 @@ function getAlbumFromDb(albumId) {
         const db = mongoose.connection;
 
         return db.once('connected', () => {
-            return Album.find({_id: albumId}, (error, result) => {
-                if (error) {
-                    db.close();
-                    return reject(error);
-                }
-
+            return Album.find({_id: albumId}).then(result => {
+                logger.info('found results in db');
                 if (result.length > 1) {
                     logger.warn('MULTIPLE ALBUMS WITH SAME ID: ' + albumId + ' !!!!!!!!!!!!!!!!');
                 }
@@ -89,15 +85,22 @@ function getAlbumFromDb(albumId) {
                 }
 
                 db.close();
+                logger.info('album data is: ', album);
                 return resolve(album);
+            }).catch(error => {
+                db.close();
+                return reject(error);
             });
+        }).catch(error => {
+            db.close();
+            return reject(error);
         });
     });
 }
 
 function addAlbumToDatabase(albumData) {
     logger.info('Saving album to database', albumData);
-    return  new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true });
         mongoose.Promise = global.Promise;
         const db = mongoose.connection;
