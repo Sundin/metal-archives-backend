@@ -123,8 +123,8 @@ module.exports = {
         });
     },
 
-    addBandToDatabaseUsingNewConnection: (bandData, updateTimestamp) => {
-        return addBandToDatabaseUsingNewConnection(bandData, updateTimestamp);
+    addBandToDatabaseUsingNewConnection: (bandData) => {
+        return addBandToDatabaseUsingNewConnection(bandData);
     }
 };
 
@@ -137,12 +137,6 @@ function addBandToDatabase(bandData, updateTimestamp) {
 
     return Band.findOneAndUpdate({_id: bandData._id}, bandData, {upsert: true, returnNewDocument: true}).then(() => {
         logger.info(bandData.band_name + ': band added to database');
-
-        if (bandData.discography) {
-            return Promise.all(bandData.discography.map(album => {
-                fetchAlbumFromMetalArchives(album);
-            }));
-        }
         return Promise.resolve();
     }).catch(error => {
         logger.error(error);
@@ -150,7 +144,7 @@ function addBandToDatabase(bandData, updateTimestamp) {
     });
 }
 
-function addBandToDatabaseUsingNewConnection(bandData, updateTimestamp) {
+function addBandToDatabaseUsingNewConnection(bandData) {
     logger.info('addBandToDatabaseUsingNewConnection');
 
     mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true });
@@ -169,11 +163,6 @@ function addBandToDatabaseUsingNewConnection(bandData, updateTimestamp) {
             return Band.findOneAndUpdate({_id: bandData._id}, bandData, {upsert: true, returnNewDocument: true}).then(() => {
                 logger.info(bandData.band_name + ': band added to database');
 
-                // if (bandData.discography) {
-                //     return Promise.all(bandData.discography.map(album => {
-                //         fetchAlbumFromMetalArchives(album);
-                //     }));
-                // }
                 db.close();
                 resolve();
             }).catch(error => {
@@ -182,27 +171,6 @@ function addBandToDatabaseUsingNewConnection(bandData, updateTimestamp) {
                 reject(error);
             });
         });
-    });
-}
-
-function addAlbumToDatabase(albumData) {
-    Album.findOneAndUpdate({_id: albumData._id}, albumData, {upsert: true, returnNewDocument: true}).then(() => {
-        logger.info(albumData.title + ': album added to database');
-        return Promise.resolve();
-    }).catch(error => {
-        logger.error(error);
-        return Promise.reject(error);
-    });
-}
-
-/* SCRAPER */
-
-function fetchAlbumFromMetalArchives(albumData) {
-    const url = albumData.url.replace('https://www.metal-archives.com', process.env.SCRAPER_URL);
-    request.get(url).then(album => {
-        addAlbumToDatabase(JSON.parse(album));
-    }).catch(error => {
-        logger.error('Failed fetching ' + albumData.url + ' with status code: ' + error.statusCode);
     });
 }
 
