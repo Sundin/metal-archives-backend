@@ -10,7 +10,7 @@ const bandScraper = require('./bandScraper.js');
 const Band = require('./models/band');
 const Album = require('./models/album');
 
-function getBand(bandName, id) {
+function getBand(id) {
     logger.info('Get band by id', id);
 
     mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true });
@@ -18,7 +18,7 @@ function getBand(bandName, id) {
     const db = mongoose.connection;
 
     return new Promise((resolve, reject) => {
-        if (!id || !bandName) {
+        if (!id) {
             return reject(new Error('Missing parameters'));
         }
 
@@ -58,12 +58,12 @@ function getBand(bandName, id) {
 
 module.exports = {
     getBand: (event, context, callback) => {
-        const { bandName, id } = event.pathParameters;
+        const { id } = event.pathParameters;
         logger.setupSentry();
 
-        logger.info('GET /bands/' + bandName + '/' + id);
-        // getBand(bandName, id).then(band => {
-        bandScraper.scrapeBandPage(id).then(band => {
+        logger.info('GET /bands/' + id);
+        getBand(id).then(band => {
+        // bandScraper.scrapeBandPage(id).then(band => {
             logger.info('Triggering callback');
             callback(null, {
                 statusCode: 200,

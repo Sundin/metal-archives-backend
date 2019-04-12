@@ -32,12 +32,11 @@ functions:
     timeout: 20
     events:
       - http: 
-          path: bands/{bandName}/{id}
+          path: bands/{id}
           method: get
           request:
             parameters: 
               paths: 
-                bandName: true
                 id: true
 
   get-album:
@@ -50,7 +49,7 @@ functions:
           method: get
           request: 
             parameters: 
-              paths: 
+              paths:
                 albumId: true
 
   search:
