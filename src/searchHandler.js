@@ -50,7 +50,7 @@ function searchOnMetalArchives(query) {
                 const id = splitUrl[splitUrl.length - 1];
                 let band = {
                     band_name: bandName,
-                    url: bandUrl,
+                    url: process.env.LAMBDA_BASE_URL + '/bands/' + id,
                     genre: result[1],
                     country: result[2],
                     _id: id

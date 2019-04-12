@@ -136,7 +136,7 @@ function getDiscography(bandId) {
 
                 discography.push({
                     _id: id,
-                    url: albumUrl,
+                    url: process.env.LAMBDA_BASE_URL + '/albums/' + id,
                     title: disc.name,
                     type: disc.type,
                     year: disc.year,
