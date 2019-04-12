@@ -38,8 +38,6 @@ functions:
             parameters: 
               paths: 
                 id: true
-            template:
-              application/json: '{ "forceRefresh" : "$input.params(''forceRefresh'')" }'
 
   get-album:
     handler: src/albumHandler.getAlbum
